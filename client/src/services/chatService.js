@@ -115,4 +115,5 @@ class ChatService {
   }
 }
 
-export default new ChatService();
+const chatServiceInstance = new ChatService();
+export default chatServiceInstance;
