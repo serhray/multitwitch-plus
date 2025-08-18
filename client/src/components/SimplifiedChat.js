@@ -76,33 +76,12 @@ const UnifiedChat = ({ streams = [] }) => {
     .map(stream => (stream.channel || '').toLowerCase())
     .filter(Boolean);
 
-  // Setup chat service
-  useEffect(() => {
-    const handleMessage = (message) => {
-      setMessages(prev => {
-        const exists = prev.some(msg => msg.id === message.id);
-        if (exists) return prev;
-        
-        const updated = [...prev, message];
-        return updated.slice(-50); // Keep last 50 messages
-      });
-    };
+  // Disable chat service for now to prevent mock messages
+  // useEffect(() => {
+  //   Chat service disabled until real backend is configured
+  // }, [channels]);
 
-    chatService.onMessage(handleMessage);
-
-    if (channels.length > 0) {
-      chatService.connectToChannels(channels);
-    }
-
-    return () => {
-      chatService.removeListener(handleMessage);
-    };
-  }, [channels]);
-
-  // Auto scroll to bottom
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  // Remove auto-scroll to prevent page scrolling issues
 
   return (
     <ChatContainer>
