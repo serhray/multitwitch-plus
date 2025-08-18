@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import Header from './components/Header';
 import StreamGrid from './components/StreamGrid';
-import UnifiedChat from './components/UnifiedChat';
+import SimplifiedChat from './components/SimplifiedChat';
 import IndividualChat from './components/IndividualChat';
 import AudioController from './components/AudioController';
 import AdBanner from './components/AdBanner';
@@ -63,25 +63,8 @@ function App() {
   const [chatMode, setChatMode] = useState('unified');
   const [selectedChannel, setSelectedChannel] = useState(null);
 
-  useEffect(() => {
-    // Initialize Socket.IO connection
-    const newSocket = io('http://localhost:5001');
-    setSocket(newSocket);
-
-    newSocket.on('connect', () => {
-      console.log('Connected to server with ID:', newSocket.id);
-    });
-
-    newSocket.on('audio-control', (data) => {
-      handleAudioControl(data);
-    });
-
-    newSocket.on('vote-focus', (data) => {
-      console.log('Vote received:', data);
-    });
-
-    return () => newSocket.close();
-  }, []);
+  // Socket.IO removed for serverless deployment
+  // Real-time features will use polling instead
 
   const handleAudioControl = (data) => {
     if (data.action === 'focus') {
@@ -179,15 +162,13 @@ function App() {
                 
                 <ChatSection>
                   {chatMode === 'unified' ? (
-                    <UnifiedChat 
+                    <SimplifiedChat 
                       streams={streams}
-                      socket={socket}
                       currentRoom={currentRoom}
                     />
                   ) : (
                     <IndividualChat 
                       streams={streams}
-                      socket={socket}
                       selectedChannel={selectedChannel}
                       onChannelChange={handleChannelChange}
                     />

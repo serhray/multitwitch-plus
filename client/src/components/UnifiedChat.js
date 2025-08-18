@@ -228,7 +228,7 @@ function UnifiedChat({ streams, socket, currentRoom }) {
   const translateMessage = async (text, messageId) => {
     try {
       console.log('Translating message:', text, 'ID:', messageId);
-      const response = await fetch('http://localhost:5001/api/chat/translate', {
+      const response = await fetch('/api/translate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -300,7 +300,7 @@ function UnifiedChat({ streams, socket, currentRoom }) {
   useEffect(() => {
     if (channels.length > 0) {
       console.log('Loading emotes for channels:', channels);
-      fetch('http://localhost:5001/api/emotes/all', {
+      fetch('/api/emotes?type=all', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -320,47 +320,20 @@ function UnifiedChat({ streams, socket, currentRoom }) {
 
   useEffect(() => {
     if (!socket) return;
-
-    const handleRoomMessage = (message) => {
-      setMessages(prev => [...prev.slice(-29), {
-        ...message,
-        isRoomMessage: true,
-        channelColor: '#9146FF' // Twitch purple for room messages
-      }]);
-    };
-
-    const handleTwitchMessage = (message) => {
-      console.log('Received twitch-chat-message:', message);
-      console.log('Current channels:', channels);
-      // Only show messages from channels we're watching (case-insensitive)
-      const msgChannel = (message.channel || '').toLowerCase();
-      console.log('Message channel:', msgChannel, 'Includes check:', channels.includes(msgChannel));
-      if (channels.includes(msgChannel)) {
-        console.log('Adding message to chat with emotes:', message.emotes);
-        const newMessage = {
-          ...message,
-          isRoomMessage: false,
-          isTwitchMessage: true,
-          channelColor: getChannelColor(msgChannel)
-        };
-        
-        setMessages(prev => {
-          // Check if message already exists to prevent duplicates
-          const exists = prev.some(msg => msg.id === newMessage.id);
-          if (exists) return prev;
-          return [...prev.slice(-29), newMessage];
-        });
-        
-        // Auto-translate if enabled and message is long enough
-        if (settings.showTranslations && message.message && message.message.length > 5) {
-          translateMessage(message.message, newMessage.id);
-        }
-      } else {
-        console.log('Message filtered out - channel not in list');
       }
-    };
 
-    const handleTwitchStatus = (status) => {
+      const newMessage = {
+        id: `${messageData.channel}-${messageData.id || Date.now()}`,
+        username: messageData.username,
+        message: messageData.message,
+        channel: messageData.channel,
+        timestamp: messageData.timestamp || new Date().toISOString(),
+        color: messageData.color || '#ffffff',
+        badges: messageData.badges || [],
+        emotes: messageData.emotes || {},
+        isTranslated: false,
+        originalMessage: messageData.message
+      };
       console.log('Twitch Chat Status:', status);
     };
 

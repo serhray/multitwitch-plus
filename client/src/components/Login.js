@@ -117,7 +117,9 @@ function Login({ isOpen, onClose, onLogin }) {
     
     try {
       // Redirecionar para o backend para iniciar OAuth
-      window.location.href = 'http://localhost:5001/auth/twitch';
+      const response = await fetch('/api/auth?action=login');
+      const data = await response.json();
+      window.location.href = data.authUrl;
     } catch (error) {
       console.error('Erro no login:', error);
       alert('Erro ao fazer login. Tente novamente.');
