@@ -188,14 +188,14 @@ function IndividualChat({ streams, socket, selectedChannel, onChannelChange }) {
       </ChatHeader>
 
       <ChatMessages ref={messagesContainerRef}>
-        {channelMessages.length === 0 ? (
+        {messages.length === 0 ? (
           <EmptyState>
             <div>💬</div>
-            <div>Aguardando mensagens de {selectedChannel}...</div>
+            <div>Selecione um canal para ver o chat</div>
           </EmptyState>
         ) : (
           <AnimatePresence>
-            {channelMessages.map((message, index) => (
+            {messages.map((message, index) => (
               <Message
                 key={`${message.id}-${index}`}
                 channelColor={message.userColor}
@@ -210,11 +210,9 @@ function IndividualChat({ streams, socket, selectedChannel, onChannelChange }) {
                   </Username>
                   <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
                 </MessageHeader>
-                <MessageText 
-                  dangerouslySetInnerHTML={{ 
-                    __html: message.processedMessage || message.message 
-                  }} 
-                />
+                <MessageText>
+                  {message.message}
+                </MessageText>
               </Message>
             ))}
           </AnimatePresence>

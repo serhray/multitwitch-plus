@@ -107,24 +107,39 @@ const UnifiedChat = ({ streams = [] }) => {
       </ChatHeader>
       
       <MessagesContainer>
-        <AnimatePresence>
-          {messages.map((message) => (
-            <Message
-              key={message.id}
-              userColor={message.color}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Username color={message.color}>
-                {message.username}
-              </Username>
-              <MessageText>{message.message}</MessageText>
-              <ChannelTag>#{message.channel}</ChannelTag>
-            </Message>
-          ))}
-        </AnimatePresence>
+        {messages.length === 0 ? (
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            height: '100%', 
+            color: '#888',
+            flexDirection: 'column',
+            gap: '10px'
+          }}>
+            <div>💬</div>
+            <div>Adicione streams para ver o chat</div>
+          </div>
+        ) : (
+          <AnimatePresence>
+            {messages.map((message) => (
+              <Message
+                key={message.id}
+                userColor={message.color}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Username color={message.color}>
+                  {message.username}
+                </Username>
+                <MessageText>{message.message}</MessageText>
+                <ChannelTag>#{message.channel}</ChannelTag>
+              </Message>
+            ))}
+          </AnimatePresence>
+        )}
         <div ref={messagesEndRef} />
       </MessagesContainer>
     </ChatContainer>
