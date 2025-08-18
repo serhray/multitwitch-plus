@@ -192,18 +192,13 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
   const handleAddStream = async () => {
     if (searchQuery.trim()) {
       try {
-        const response = await fetch(`/api/twitch/validate/${searchQuery.trim()}`);
-        const data = await response.json();
-        
-        if (response.ok && data.exists && data.isLive) {
-          onStreamAdd(searchQuery.trim());
-          setSearchQuery('');
-        } else {
-          alert(data.error);
-        }
+        // For now, add stream directly without API validation
+        // API validation can be added later when backend is fully configured
+        onStreamAdd(searchQuery.trim());
+        setSearchQuery('');
       } catch (error) {
-        console.error('Error validating streamer:', error);
-        alert('Erro ao verificar streamer');
+        console.error('Error adding streamer:', error);
+        alert('Erro ao adicionar streamer');
       }
     }
   };
