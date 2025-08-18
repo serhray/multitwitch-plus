@@ -1,0 +1,47 @@
+{
+  "name": "multitwitch-plus",
+  "version": "1.0.0",
+  "description": "Plataforma avançada para assistir múltiplas streams da Twitch",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && nodemon index.js",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "start": "cd server && node index.js",
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "vercel-build": "cd client && npm install && npm run build"
+  },
+  "keywords": [
+    "twitch",
+    "streaming",
+    "multistream",
+    "chat"
+  ],
+  "author": "Seu Nome",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "node-cron": "^3.0.2",
+    "socket.io": "^4.7.2",
+    "tmi.js": "^1.8.5",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "nodemon": "^2.0.20"
+  },
+  "keywords": [
+    "twitch",
+    "streaming",
+    "multistream",
+    "chat",
+    "audio-control"
+  ],
+  "author": "Sergio",
+  "license": "MIT"
+}
