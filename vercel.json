@@ -1,46 +1,33 @@
 {
   "version": 2,
   "name": "multitwitch-plus",
-  "builds": [
-    {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
-    },
-    {
-      "src": "server/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/server/index.js"
-    },
-    {
-      "src": "/socket.io/(.*)",
-      "dest": "/server/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/client/build/index.html"
-    }
-  ],
-  "env": {
-    "TWITCH_CLIENT_ID": "@twitch_client_id",
-    "TWITCH_CLIENT_SECRET": "@twitch_client_secret",
-    "TWITCH_ACCESS_TOKEN": "@twitch_access_token"
-  },
-  "build": {
-    "env": {
-      "REACT_APP_SERVER_URL": "https://multitwitch-plus.vercel.app"
-    }
-  },
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "client/build",
+  "installCommand": "npm run install-all",
   "functions": {
     "server/index.js": {
       "maxDuration": 30
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/server/index.js"
+    },
+    {
+      "source": "/socket.io/(.*)",
+      "destination": "/server/index.js"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
+      ]
+    }
+  ]
 }
