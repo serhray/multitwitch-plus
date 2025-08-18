@@ -76,10 +76,24 @@ const UnifiedChat = ({ streams = [] }) => {
     .map(stream => (stream.channel || '').toLowerCase())
     .filter(Boolean);
 
-  // Disable chat service for now to prevent mock messages
-  // useEffect(() => {
-  //   Chat service disabled until real backend is configured
-  // }, [channels]);
+  // Setup basic chat without polling service
+  useEffect(() => {
+    // Add welcome message when channels change
+    if (channels.length > 0) {
+      const welcomeMessage = {
+        id: `welcome-${Date.now()}`,
+        username: 'Sistema',
+        message: `Chat conectado para ${channels.join(', ')}`,
+        channel: 'sistema',
+        timestamp: new Date().toISOString(),
+        color: '#9146ff'
+      };
+      
+      setMessages([welcomeMessage]);
+    } else {
+      setMessages([]);
+    }
+  }, [channels]);
 
   // Remove auto-scroll to prevent page scrolling issues
 

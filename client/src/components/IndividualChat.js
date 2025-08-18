@@ -137,42 +137,23 @@ function IndividualChat({ streams, socket, selectedChannel, onChannelChange }) {
     msg.channel && msg.channel.toLowerCase() === selectedChannel?.toLowerCase()
   );
 
+  // Setup basic chat display
   useEffect(() => {
-    if (!socket) return;
-
-    const handleTwitchMessage = (message) => {
-      const msgChannel = (message.channel || '').toLowerCase();
+    if (selectedChannel) {
+      const welcomeMessage = {
+        id: `welcome-${selectedChannel}-${Date.now()}`,
+        username: 'Sistema',
+        message: `Chat individual conectado para #${selectedChannel}`,
+        channel: selectedChannel,
+        timestamp: new Date().toISOString(),
+        userColor: '#9146ff'
+      };
       
-      if (msgChannel === selectedChannel?.toLowerCase()) {
-        const newMessage = {
-          ...message,
-          userColor: getUserColor(message.username)
-        };
-        
-        setMessages(prev => {
-          // Check if message already exists to prevent duplicates
-          const exists = prev.some(msg => msg.id === newMessage.id);
-          if (exists) return prev;
-          return [...prev.slice(-49), newMessage];
-        });
-      }
-    };
-
-    socket.off('twitch-chat-message', handleTwitchMessage);
-    socket.on('twitch-chat-message', handleTwitchMessage);
-
-    return () => {
-      socket.off('twitch-chat-message', handleTwitchMessage);
-    };
-  }, [socket, selectedChannel]);
-
-  // Auto-scroll to bottom
-  useEffect(() => {
-    if (messagesContainerRef.current) {
-      const container = messagesContainerRef.current;
-      container.scrollTop = container.scrollHeight;
+      setMessages([welcomeMessage]);
     }
-  }, [channelMessages]);
+  }, [selectedChannel]);
+
+  // Remove auto-scroll to prevent page scrolling issues
 
   // Clear messages when channel changes
   useEffect(() => {
