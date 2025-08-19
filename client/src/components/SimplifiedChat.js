@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import chatService from '../services/chatService';
-import io from 'socket.io-client';
 
 const ChatContainer = styled.div`
   flex: 1;
@@ -68,126 +66,74 @@ const ChannelTag = styled.span`
   margin-left: 8px;
 `;
 
-const UnifiedChat = ({ streams = [], socket }) => {
-  const [messages, setMessages] = useState([]);
-  const messagesEndRef = useRef(null);
+const ChannelSelector = styled.select`
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+
+  &:focus {
+    border-color: #9146ff;
+  }
+
+  option {
+    background: #1a1a1a;
+    color: white;
+  }
+`;
+
+const ChatIframe = styled.iframe`
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+`;
+
+const ChatSelector = ({ streams = [] }) => {
+  const [selectedChannel, setSelectedChannel] = useState('');
 
   // Get channels from streams
   const channels = streams
     .map(stream => (stream.channel || '').toLowerCase())
     .filter(Boolean);
 
-  // Detect if we're in local or production mode
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-  // Setup real chat functionality
+  // Auto-select first channel when streams change
   useEffect(() => {
-    if (channels.length === 0) {
-      setMessages([]);
-      return;
+    if (channels.length > 0 && !selectedChannel) {
+      setSelectedChannel(channels[0]);
+    } else if (channels.length === 0) {
+      setSelectedChannel('');
     }
-
-    if (isLocal && socket) {
-      // Use Socket.IO for local development
-      const handleTwitchMessage = (messageData) => {
-        const activeChannels = channels;
-        const messageChannel = messageData.channel?.toLowerCase();
-        
-        if (!activeChannels.includes(messageChannel)) return;
-
-        setMessages(prev => {
-          if (prev.find(m => m.id === messageData.id)) return prev;
-          const newMessages = [...prev, messageData];
-          return newMessages.slice(-50);
-        });
-      };
-
-      socket.on('twitch-chat-message', handleTwitchMessage);
-      
-      // Join channels
-      channels.forEach(channel => {
-        socket.emit('join-twitch-chat', channel);
-      });
-
-      // Add welcome message
-      const welcomeMessage = {
-        id: `welcome-${Date.now()}`,
-        username: 'Sistema',
-        message: `Conectando ao chat de ${channels.join(', ')}...`,
-        channel: 'sistema',
-        timestamp: new Date().toISOString(),
-        color: '#9146ff'
-      };
-      setMessages([welcomeMessage]);
-
-      return () => {
-        socket.off('twitch-chat-message', handleTwitchMessage);
-        channels.forEach(channel => {
-          socket.emit('leave-twitch-chat', channel);
-        });
-      };
-    } else {
-      // Production mode - use polling service
-      chatService.connectToChannels(channels);
-
-      const handleMessage = (message) => {
-        setMessages(prev => {
-          if (prev.find(m => m.id === message.id)) return prev;
-          const newMessages = [...prev, message];
-          return newMessages.slice(-50);
-        });
-      };
-
-      chatService.onMessage(handleMessage);
-
-      // Add welcome message
-      const welcomeMessage = {
-        id: `welcome-${Date.now()}`,
-        username: 'Sistema',
-        message: `Chat conectado para ${channels.join(', ')}`,
-        channel: 'sistema',
-        timestamp: new Date().toISOString(),
-        color: '#9146ff'
-      };
-      setMessages([welcomeMessage]);
-
-      return () => {
-        chatService.removeListener(handleMessage);
-      };
-    }
-  }, [channels, socket, isLocal]);
-
-  // Remove auto-scroll to prevent page scrolling issues
+  }, [channels, selectedChannel]);
 
   return (
     <ChatContainer>
       <ChatHeader>
-        <ChatTitle>Chat Unificado</ChatTitle>
-        <div style={{ fontSize: '12px', color: '#888' }}>
-          {channels.length} canais
-        </div>
+        <ChatTitle>Chat</ChatTitle>
+        <ChannelSelector
+          value={selectedChannel}
+          onChange={(e) => setSelectedChannel(e.target.value)}
+        >
+          <option value="">Selecione um canal</option>
+          {channels.map(channel => (
+            <option key={channel} value={channel}>
+              #{channel}
+            </option>
+          ))}
+        </ChannelSelector>
       </ChatHeader>
       
       <MessagesContainer>
-        <AnimatePresence>
-          {messages.map((message) => (
-            <Message
-              key={message.id}
-              userColor={message.color}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Username color={message.color}>
-                {message.username}
-              </Username>
-              <MessageText>{message.message}</MessageText>
-              <ChannelTag>#{message.channel}</ChannelTag>
-            </Message>
-          ))}
-        </AnimatePresence>
-        {messages.length === 0 && (
+        {selectedChannel ? (
+          <ChatIframe
+            src={`https://www.twitch.tv/embed/${selectedChannel}/chat?parent=${window.location.hostname}`}
+            title={`Chat de ${selectedChannel}`}
+          />
+        ) : (
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -198,13 +144,12 @@ const UnifiedChat = ({ streams = [], socket }) => {
             gap: '10px'
           }}>
             <div>💬</div>
-            <div>Adicione streams para ver o chat</div>
+            <div>Selecione um canal para participar do chat</div>
           </div>
         )}
-        <div ref={messagesEndRef} />
       </MessagesContainer>
     </ChatContainer>
   );
 };
 
-export default UnifiedChat;
+export default ChatSelector;
