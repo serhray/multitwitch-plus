@@ -127,38 +127,91 @@ const getUserColor = (username) => {
   return colors[colorIndex];
 };
 
-function IndividualChat({ streams, socket, selectedChannel, onChannelChange }) {
+const IndividualChat = ({ streams = [], selectedChannel, onChannelChange, socket }) => {
   const [messages, setMessages] = useState([]);
-  const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+  const messagesEndRef = useRef(null);
+
+  // Detect if we're in local or production mode
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
   // Filter messages for selected channel
-  const channelMessages = messages.filter(msg => 
-    msg.channel && msg.channel.toLowerCase() === selectedChannel?.toLowerCase()
+  const channelMessages = messages.filter(message => 
+    message.channel?.toLowerCase() === selectedChannel?.toLowerCase()
   );
 
-  // Setup basic chat display
+  // Setup real chat functionality
   useEffect(() => {
-    if (selectedChannel) {
+    if (!selectedChannel) {
+      setMessages([]);
+      return;
+    }
+
+    if (isLocal && socket) {
+      // Use Socket.IO for local development
+      const handleTwitchMessage = (messageData) => {
+        if (messageData.channel?.toLowerCase() === selectedChannel.toLowerCase()) {
+          setMessages(prev => {
+            if (prev.find(m => m.id === messageData.id)) return prev;
+            const newMessages = [...prev, messageData];
+            return newMessages.slice(-50);
+          });
+        }
+      };
+
+      socket.on('twitch-chat-message', handleTwitchMessage);
+      socket.emit('join-twitch-chat', selectedChannel);
+
+      // Add welcome message
       const welcomeMessage = {
         id: `welcome-${selectedChannel}-${Date.now()}`,
         username: 'Sistema',
-        message: `Chat individual conectado para #${selectedChannel}`,
+        message: `Conectando ao chat de ${selectedChannel}...`,
         channel: selectedChannel,
         timestamp: new Date().toISOString(),
         userColor: '#9146ff'
       };
-      
       setMessages([welcomeMessage]);
+
+      return () => {
+        socket.off('twitch-chat-message', handleTwitchMessage);
+        socket.emit('leave-twitch-chat', selectedChannel);
+      };
+    } else {
+      // Production mode - use polling service
+      chatService.connectToChannels([selectedChannel]);
+
+      const handleMessage = (message) => {
+        if (message.channel?.toLowerCase() === selectedChannel.toLowerCase()) {
+          setMessages(prev => {
+            if (prev.find(m => m.id === message.id)) return prev;
+            const newMessages = [...prev, message];
+            return newMessages.slice(-50);
+          });
+        }
+      };
+
+      chatService.onMessage(handleMessage);
+
+      // Add welcome message
+      const welcomeMessage = {
+        id: `welcome-${selectedChannel}-${Date.now()}`,
+        username: 'Sistema',
+        message: `Chat conectado para ${selectedChannel}`,
+        channel: selectedChannel,
+        timestamp: new Date().toISOString(),
+        userColor: '#9146ff'
+      };
+      setMessages([welcomeMessage]);
+
+      return () => {
+        chatService.removeListener(handleMessage);
+      };
     }
-  }, [selectedChannel]);
+  }, [selectedChannel, socket, isLocal]);
 
   // Remove auto-scroll to prevent page scrolling issues
 
-  // Clear messages when channel changes
-  useEffect(() => {
-    setMessages([]);
-  }, [selectedChannel]);
 
   if (!streams || streams.length === 0) {
     return (
@@ -188,34 +241,33 @@ function IndividualChat({ streams, socket, selectedChannel, onChannelChange }) {
       </ChatHeader>
 
       <ChatMessages ref={messagesContainerRef}>
-        {messages.length === 0 ? (
+        <AnimatePresence>
+          {messages.map((message, index) => (
+            <Message
+              key={`${message.id}-${index}`}
+              channelColor={message.userColor}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <MessageHeader>
+                <Username color={message.userColor}>
+                  {message.username}
+                </Username>
+                <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
+              </MessageHeader>
+              <MessageText>
+                {message.message}
+              </MessageText>
+            </Message>
+          ))}
+        </AnimatePresence>
+        {messages.length === 0 && (
           <EmptyState>
             <div>💬</div>
             <div>Selecione um canal para ver o chat</div>
           </EmptyState>
-        ) : (
-          <AnimatePresence>
-            {messages.map((message, index) => (
-              <Message
-                key={`${message.id}-${index}`}
-                channelColor={message.userColor}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <MessageHeader>
-                  <Username color={message.userColor}>
-                    {message.username}
-                  </Username>
-                  <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
-                </MessageHeader>
-                <MessageText>
-                  {message.message}
-                </MessageText>
-              </Message>
-            ))}
-          </AnimatePresence>
         )}
         <div ref={messagesEndRef} />
       </ChatMessages>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import chatService from '../services/chatService';
+import io from 'socket.io-client';
 
 const ChatContainer = styled.div`
   flex: 1;
@@ -67,7 +68,7 @@ const ChannelTag = styled.span`
   margin-left: 8px;
 `;
 
-const UnifiedChat = ({ streams = [] }) => {
+const UnifiedChat = ({ streams = [], socket }) => {
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
 
@@ -76,10 +77,70 @@ const UnifiedChat = ({ streams = [] }) => {
     .map(stream => (stream.channel || '').toLowerCase())
     .filter(Boolean);
 
-  // Setup basic chat without polling service
+  // Detect if we're in local or production mode
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+  // Setup real chat functionality
   useEffect(() => {
-    // Add welcome message when channels change
-    if (channels.length > 0) {
+    if (channels.length === 0) {
+      setMessages([]);
+      return;
+    }
+
+    if (isLocal && socket) {
+      // Use Socket.IO for local development
+      const handleTwitchMessage = (messageData) => {
+        const activeChannels = channels;
+        const messageChannel = messageData.channel?.toLowerCase();
+        
+        if (!activeChannels.includes(messageChannel)) return;
+
+        setMessages(prev => {
+          if (prev.find(m => m.id === messageData.id)) return prev;
+          const newMessages = [...prev, messageData];
+          return newMessages.slice(-50);
+        });
+      };
+
+      socket.on('twitch-chat-message', handleTwitchMessage);
+      
+      // Join channels
+      channels.forEach(channel => {
+        socket.emit('join-twitch-chat', channel);
+      });
+
+      // Add welcome message
+      const welcomeMessage = {
+        id: `welcome-${Date.now()}`,
+        username: 'Sistema',
+        message: `Conectando ao chat de ${channels.join(', ')}...`,
+        channel: 'sistema',
+        timestamp: new Date().toISOString(),
+        color: '#9146ff'
+      };
+      setMessages([welcomeMessage]);
+
+      return () => {
+        socket.off('twitch-chat-message', handleTwitchMessage);
+        channels.forEach(channel => {
+          socket.emit('leave-twitch-chat', channel);
+        });
+      };
+    } else {
+      // Production mode - use polling service
+      chatService.connectToChannels(channels);
+
+      const handleMessage = (message) => {
+        setMessages(prev => {
+          if (prev.find(m => m.id === message.id)) return prev;
+          const newMessages = [...prev, message];
+          return newMessages.slice(-50);
+        });
+      };
+
+      chatService.onMessage(handleMessage);
+
+      // Add welcome message
       const welcomeMessage = {
         id: `welcome-${Date.now()}`,
         username: 'Sistema',
@@ -88,12 +149,13 @@ const UnifiedChat = ({ streams = [] }) => {
         timestamp: new Date().toISOString(),
         color: '#9146ff'
       };
-      
       setMessages([welcomeMessage]);
-    } else {
-      setMessages([]);
+
+      return () => {
+        chatService.removeListener(handleMessage);
+      };
     }
-  }, [channels]);
+  }, [channels, socket, isLocal]);
 
   // Remove auto-scroll to prevent page scrolling issues
 
@@ -107,7 +169,25 @@ const UnifiedChat = ({ streams = [] }) => {
       </ChatHeader>
       
       <MessagesContainer>
-        {messages.length === 0 ? (
+        <AnimatePresence>
+          {messages.map((message) => (
+            <Message
+              key={message.id}
+              userColor={message.color}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Username color={message.color}>
+                {message.username}
+              </Username>
+              <MessageText>{message.message}</MessageText>
+              <ChannelTag>#{message.channel}</ChannelTag>
+            </Message>
+          ))}
+        </AnimatePresence>
+        {messages.length === 0 && (
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -120,25 +200,6 @@ const UnifiedChat = ({ streams = [] }) => {
             <div>💬</div>
             <div>Adicione streams para ver o chat</div>
           </div>
-        ) : (
-          <AnimatePresence>
-            {messages.map((message) => (
-              <Message
-                key={message.id}
-                userColor={message.color}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Username color={message.color}>
-                  {message.username}
-                </Username>
-                <MessageText>{message.message}</MessageText>
-                <ChannelTag>#{message.channel}</ChannelTag>
-              </Message>
-            ))}
-          </AnimatePresence>
         )}
         <div ref={messagesEndRef} />
       </MessagesContainer>

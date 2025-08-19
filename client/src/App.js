@@ -63,8 +63,17 @@ function App() {
   const [chatMode, setChatMode] = useState('unified');
   const [selectedChannel, setSelectedChannel] = useState(null);
 
-  // Socket.IO removed for serverless deployment
-  // Real-time features will use polling instead
+  // Socket.IO connection for local development
+  useEffect(() => {
+    // Check if we're in local development (has localhost in URL)
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    if (isLocal) {
+      const newSocket = io('http://localhost:5001');
+      setSocket(newSocket);
+      return () => newSocket.close();
+    }
+  }, []);
 
   const handleAudioControl = (data) => {
     if (data.action === 'focus') {
@@ -165,12 +174,14 @@ function App() {
                     <SimplifiedChat 
                       streams={streams}
                       currentRoom={currentRoom}
+                      socket={socket}
                     />
                   ) : (
                     <IndividualChat 
                       streams={streams}
                       selectedChannel={selectedChannel}
                       onChannelChange={handleChannelChange}
+                      socket={socket}
                     />
                   )}
                   
