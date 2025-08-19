@@ -1,18 +1,49 @@
 {
-  "name": "multitwitch-plus",
-  "version": "1.0.0",
-  "description": "Advanced Twitch multistream platform with chat integration",
-  "main": "index.js",
-  "scripts": {
-    "start": "cd client && npm start",
-    "build": "cd client && npm run build",
-    "install": "cd client && npm install",
-    "dev": "concurrently \"cd server && npm start\" \"cd client && npm start\""
+  "name": "multitwitch-plus-client",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^14.5.2",
+    "axios": "^1.5.0",
+    "chart.js": "^4.4.0",
+    "framer-motion": "^10.16.4",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0",
+    "react-draggable": "^4.4.5",
+    "react-grid-layout": "^1.4.4",
+    "react-player": "^2.13.0",
+    "react-resizable": "^3.0.5",
+    "react-router-dom": "^6.15.0",
+    "react-scripts": "^5.0.1",
+    "socket.io-client": "^4.7.2",
+    "styled-components": "^6.0.7",
+    "web-vitals": "^2.1.4"
   },
-  "keywords": ["twitch", "multistream", "chat", "streaming"],
-  "author": "Sergio",
-  "license": "MIT",
-  "devDependencies": {
-    "concurrently": "^8.2.0"
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
