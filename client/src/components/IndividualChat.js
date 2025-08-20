@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
+import chatService from '../services/chatService';
 
 const ChatContainer = styled.div`
   flex: 1;
