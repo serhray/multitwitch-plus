@@ -6,7 +6,6 @@
     "node": "18.x"
   },
   "scripts": {
-    "build": "npm --prefix client ci && npm --prefix client run build",
-    "vercel-build": "npm --prefix client ci && npm --prefix client run build"
+    "build": "npm --prefix client ci && npm --prefix client run build"
   }
 }
