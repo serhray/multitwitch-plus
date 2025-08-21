@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import UserProfile from './UserProfile';
+import streamerService from '../services/streamerService';
+import Notification from './Notification';
 
 const HeaderContainer = styled.header`
   height: 80px;
@@ -129,12 +131,18 @@ const AddButton = styled.button`
   cursor: pointer;
   transition: transform 0.2s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     transform: translateY(-2px);
   }
 
-  &:active {
+  &:active:not(:disabled) {
     transform: translateY(0);
+  }
+
+  &:disabled {
+    background: linear-gradient(45deg, #666, #888);
+    cursor: not-allowed;
+    transform: none;
   }
 `;
 
@@ -147,22 +155,54 @@ const NavSection = styled.div`
 function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams, onChatModeToggle, chatMode }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [isValidating, setIsValidating] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const { isAuthenticated, logout } = useAuth();
 
   const handleAddStream = async () => {
-    if (searchQuery.trim()) {
-      try {
-        // For now, add stream directly without API validation
-        // API validation can be added later when backend is fully configured
-        onStreamAdd(searchQuery.trim());
-        setSearchQuery('');
-      } catch (error) {
-        console.error('Error adding streamer:', error);
-        alert('Erro ao adicionar streamer');
-      }
+    if (!searchQuery.trim()) return;
+    
+    const channelName = searchQuery.trim();
+    
+    // Check if streamer is already added
+    if (streams.some(stream => stream.channel.toLowerCase() === channelName.toLowerCase())) {
+      showNotification('Este streamer já foi adicionado!', 'warning');
+      return;
     }
+
+    setIsValidating(true);
+    
+    try {
+      // Validate streamer
+      const validation = await streamerService.validateStreamer(channelName);
+      
+      if (!validation.exists) {
+        showNotification(`Streamer "${channelName}" não existe na Twitch!`, 'error');
+        return;
+      }
+      
+      if (!validation.isLive) {
+        showNotification(`Streamer "${channelName}" não está online no momento!`, 'warning');
+        return;
+      }
+      
+      // Add stream if validation passes
+      onStreamAdd(channelName);
+      setSearchQuery('');
+      showNotification(`Streamer "${channelName}" adicionado com sucesso!`, 'success');
+      
+    } catch (error) {
+      console.error('Error validating streamer:', error);
+      showNotification('Erro ao validar streamer. Tente novamente.', 'error');
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const showNotification = (message, type = 'info') => {
+    setNotification({ message, type });
   };
 
   const handleKeyPress = (e) => {
@@ -253,8 +293,8 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyPress={handleKeyPress}
         />
-        <AddButton onClick={handleAddStream}>
-          Adicionar Stream
+        <AddButton onClick={handleAddStream} disabled={isValidating}>
+          {isValidating ? 'Validando...' : 'Adicionar Stream'}
         </AddButton>
       </SearchSection>
 
@@ -267,8 +307,17 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
         
         <UserProfile />
         
-      </NavSection>
-    </HeaderContainer>
+              </NavSection>
+      </HeaderContainer>
+      
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+    </>
   );
 }
 

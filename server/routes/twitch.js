@@ -37,6 +37,64 @@ async function getTwitchToken() {
   return await getAccessToken();
 }
 
+// Validate if streamer exists and is online
+router.post('/validate-streamer', async (req, res) => {
+  try {
+    const { channel } = req.body;
+    
+    if (!channel) {
+      return res.status(400).json({ error: 'Channel name is required' });
+    }
+
+    const token = await getAccessToken();
+    
+    // First, check if user exists
+    const userResponse = await axios.get(`${TWITCH_API_URL}/users?login=${channel}`, {
+      headers: {
+        'Client-ID': process.env.TWITCH_CLIENT_ID,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (userResponse.data.data.length === 0) {
+      return res.json({
+        exists: false,
+        isLive: false,
+        message: 'Streamer não encontrado'
+      });
+    }
+
+    const user = userResponse.data.data[0];
+    
+    // Check if user is currently streaming
+    const streamResponse = await axios.get(`${TWITCH_API_URL}/streams?user_login=${channel}`, {
+      headers: {
+        'Client-ID': process.env.TWITCH_CLIENT_ID,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    const isLive = streamResponse.data.data.length > 0;
+    
+    res.json({
+      exists: true,
+      isLive: isLive,
+      user: {
+        id: user.id,
+        login: user.login,
+        display_name: user.display_name,
+        profile_image_url: user.profile_image_url
+      },
+      stream: isLive ? streamResponse.data.data[0] : null,
+      message: isLive ? 'Streamer está online' : 'Streamer não está online'
+    });
+    
+  } catch (error) {
+    console.error('Error validating streamer:', error);
+    res.status(500).json({ error: 'Failed to validate streamer' });
+  }
+});
+
 // Get stream information for multiple channels
 router.post('/streams', async (req, res) => {
   try {

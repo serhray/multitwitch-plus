@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import styled from 'styled-components';
 
 const PlayerContainer = styled.div`
@@ -79,12 +79,13 @@ const AudioButton = styled.button`
 
 const VolumeSlider = styled.input`
   width: 60px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
   outline: none;
   opacity: 0;
   transition: opacity 0.3s ease;
+  cursor: pointer;
   
   ${PlayerContainer}:hover & {
     opacity: 1;
@@ -92,11 +93,36 @@ const VolumeSlider = styled.input`
 
   &::-webkit-slider-thumb {
     appearance: none;
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    background: #9146ff;
+    background: linear-gradient(45deg, #9146ff, #00f5ff);
     cursor: pointer;
+    box-shadow: 0 2px 8px rgba(145, 70, 255, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  &::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 12px rgba(145, 70, 255, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.2);
+  }
+
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #9146ff, #00f5ff);
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(145, 70, 255, 0.4);
+  }
+
+  &::-moz-range-track {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    border: none;
   }
 `;
 
@@ -107,18 +133,7 @@ function StreamPlayer({ stream, isFocused, onVote, votes, showVoteButton, layout
   const [isMuted, setIsMuted] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    if (stream && stream.isLive && stream.channel) {
-      loadTwitchEmbed();
-    }
-  }, [stream, layoutMode, isFocused, loadTwitchEmbed]);
-
-  useEffect(() => {
-    // Adjust volume based on focus
-    setVolume(isFocused ? 1 : 0.3);
-  }, [isFocused]);
-
-  const loadTwitchEmbed = () => {
+  const loadTwitchEmbed = useCallback(() => {
     if (playerRef.current && window.Twitch && window.Twitch.Embed) {
       // Clear previous embed
       playerRef.current.innerHTML = '';
@@ -161,7 +176,18 @@ function StreamPlayer({ stream, isFocused, onVote, votes, showVoteButton, layout
         setIsLoaded(true);
       }
     }
-  };
+  }, [stream, layoutMode, isFocused, isMuted, volume]);
+
+  useEffect(() => {
+    if (stream && stream.isLive && stream.channel) {
+      loadTwitchEmbed();
+    }
+  }, [stream, layoutMode, isFocused, loadTwitchEmbed]);
+
+  useEffect(() => {
+    // Adjust volume based on focus
+    setVolume(isFocused ? 1 : 0.3);
+  }, [isFocused]);
 
   const handleVolumeChange = (e) => {
     const newVolume = parseFloat(e.target.value);
@@ -184,12 +210,12 @@ function StreamPlayer({ stream, isFocused, onVote, votes, showVoteButton, layout
     }
   };
 
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
+  const toggleMute = useCallback(() => {
+    setIsMuted(prev => !prev);
     if (isLoaded) {
       loadTwitchEmbed(); // Reload with new mute state
     }
-  };
+  }, [isLoaded, loadTwitchEmbed]);
 
   // Safe guards for stream availability
   if (!stream || !stream.channel) {

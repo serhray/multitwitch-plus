@@ -106,14 +106,24 @@ function App() {
   };
 
   const handleStreamRemove = (streamId) => {
-    setStreams(streams.filter(stream => stream.id !== streamId));
+    const updatedStreams = streams.filter(stream => stream.id !== streamId);
+    setStreams(updatedStreams);
+    
     // If the removed stream was focused, focus on the first remaining stream
-    if (focusedStream === streamId && streams.length > 1) {
-      const remainingStreams = streams.filter(stream => stream.id !== streamId);
-      if (remainingStreams.length > 0) {
-        setFocusedStream(remainingStreams[0].id);
+    if (focusedStream === streamId) {
+      if (updatedStreams.length > 0) {
+        setFocusedStream(updatedStreams[0].id);
       } else {
         setFocusedStream(null);
+      }
+    }
+    
+    // Update selected channel for individual chat if needed
+    if (selectedChannel && streams.find(s => s.id === streamId)?.channel === selectedChannel) {
+      if (updatedStreams.length > 0) {
+        setSelectedChannel(updatedStreams[0].channel);
+      } else {
+        setSelectedChannel(null);
       }
     }
   };

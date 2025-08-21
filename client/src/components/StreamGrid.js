@@ -68,6 +68,8 @@ const VoteButton = styled.button`
   }
 `;
 
+
+
 const EmptyState = styled(motion.div)`
   display: flex;
   flex-direction: column;
@@ -158,20 +160,23 @@ function StreamGrid({ streams, focusedStream, onStreamFocus, socket, currentRoom
 
   return (
     <GridContainer hasStreams={true}>
-      {focusedStreamData && (
-        <FocusedStreamContainer
-          key={focusedStream}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <StreamPlayer
-            stream={focusedStreamData}
-            isFocused={true}
-            layoutMode={layoutMode}
-          />
-        </FocusedStreamContainer>
-      )}
+      <AnimatePresence mode="wait">
+        {focusedStreamData && (
+          <FocusedStreamContainer
+            key={focusedStream}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+          >
+            <StreamPlayer
+              stream={focusedStreamData}
+              isFocused={true}
+              layoutMode={layoutMode}
+            />
+          </FocusedStreamContainer>
+        )}
+      </AnimatePresence>
 
       {secondaryStreams.length > 0 && (
         <SecondaryStreamsContainer>

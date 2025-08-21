@@ -55,28 +55,44 @@ const VolumeLabel = styled.label`
 
 const VolumeSlider = styled.input`
   width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
   outline: none;
   margin-bottom: 10px;
+  cursor: pointer;
 
   &::-webkit-slider-thumb {
     appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: linear-gradient(45deg, #9146ff, #00f5ff);
     cursor: pointer;
-    box-shadow: 0 2px 10px rgba(145, 70, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(145, 70, 255, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  &::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(145, 70, 255, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.2);
   }
 
   &::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: linear-gradient(45deg, #9146ff, #00f5ff);
     cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(145, 70, 255, 0.4);
+  }
+
+  &::-moz-range-track {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
     border: none;
   }
 `;
@@ -88,11 +104,12 @@ const VolumeValue = styled.span`
 `;
 
 const StreamVolumeList = styled.div`
-  max-height: 200px;
+  max-height: 250px;
   overflow-y: auto;
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.2);
-  padding: 10px;
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 `;
 
 const StreamVolumeItem = styled.div`
@@ -130,18 +147,44 @@ const StreamControls = styled.div`
 
 const StreamSlider = styled.input`
   width: 80px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
   outline: none;
+  cursor: pointer;
 
   &::-webkit-slider-thumb {
     appearance: none;
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    background: #9146ff;
+    background: linear-gradient(45deg, #9146ff, #00f5ff);
     cursor: pointer;
+    box-shadow: 0 3px 8px rgba(145, 70, 255, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  &::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(145, 70, 255, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.2);
+  }
+
+  &::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #9146ff, #00f5ff);
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 3px 8px rgba(145, 70, 255, 0.3);
+  }
+
+  &::-moz-range-track {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    border: none;
   }
 `;
 
@@ -149,8 +192,8 @@ const RemoveButton = styled.button`
   background: rgba(255, 59, 48, 0.8);
   border: none;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   color: white;
   font-size: 12px;
   cursor: pointer;
@@ -158,10 +201,12 @@ const RemoveButton = styled.button`
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  font-weight: bold;
 
   &:hover {
     background: rgba(255, 59, 48, 1);
     transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
   }
 `;
 
@@ -175,9 +220,7 @@ const ActivityIndicator = styled.div`
   color: rgba(255, 255, 255, 0.8);
 `;
 
-function AudioController() {
-  const [streams, setStreams] = useState([]);
-  const [focusedStream, setFocusedStream] = useState(null);
+function AudioController({ streams, focusedStream, onStreamRemove }) {
   const [audioLevels, setAudioLevels] = useState({});
   const [mutedStreams, setMutedStreams] = useState(new Set());
   const [volumes, setVolumes] = useState({});
@@ -259,8 +302,8 @@ function AudioController() {
   };
 
   const handleRemoveStream = (streamId) => {
-    if (true) {
-      setStreams(prev => prev.filter(stream => stream.id !== streamId));
+    if (onStreamRemove) {
+      onStreamRemove(streamId);
     }
   };
 
@@ -336,7 +379,10 @@ function AudioController() {
 
       {streams.length > 0 && (
         <VolumeSection>
-          <VolumeLabel>Controle Individual</VolumeLabel>
+          <VolumeLabel>
+            📺 Gerenciar Streams
+            <VolumeValue>{streams.length} stream{streams.length !== 1 ? 's' : ''}</VolumeValue>
+          </VolumeLabel>
           <StreamVolumeList>
             {streams.map(stream => (
               <StreamVolumeItem key={stream.id}>
@@ -357,7 +403,7 @@ function AudioController() {
                     onClick={() => handleRemoveStream(stream.id)}
                     title="Remover stream"
                   >
-                    ×
+                    ✕
                   </RemoveButton>
                 </StreamControls>
               </StreamVolumeItem>
