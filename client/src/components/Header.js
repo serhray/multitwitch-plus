@@ -267,47 +267,47 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
   }, [showDropdown]);
 
   return (
-    <HeaderContainer>
-      <LogoContainer ref={dropdownRef}>
-        <Logo onClick={handleLogoClick}>
-          <span>Multitwitch+</span>
-        </Logo>
-        <DropdownMenu show={showDropdown}>
-          <DropdownItem onClick={handleHomeClick}>
-            🏠 Página Inicial
-          </DropdownItem>
-          <DropdownItem onClick={handleLoginClick}>
-            {isAuthenticated ? '🚪 Logout' : '🔐 Login'}
-          </DropdownItem>
-          <DropdownItem onClick={handleTutorialClick}>
-            📚 Como usar
-          </DropdownItem>
-        </DropdownMenu>
-      </LogoContainer>
-      
-      <SearchSection>
-        <SearchInput
-          type="text"
-          placeholder="Digite o nome do streamer para adicionar..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyPress={handleKeyPress}
-        />
-        <AddButton onClick={handleAddStream} disabled={isValidating}>
-          {isValidating ? 'Validando...' : 'Adicionar Stream'}
-        </AddButton>
-      </SearchSection>
-
-      <NavSection>
-        {streams && streams.length >= 2 && (
-          <AddButton onClick={onChatModeToggle}>
-            {chatMode === 'unified' ? 'Alternar Chats' : 'Chat Unificado'}
+    <>
+      <HeaderContainer>
+        <LogoContainer ref={dropdownRef}>
+          <Logo onClick={handleLogoClick}>
+            <span>Multitwitch+</span>
+          </Logo>
+          <DropdownMenu show={showDropdown}>
+            <DropdownItem onClick={handleHomeClick}>
+              🏠 Página Inicial
+            </DropdownItem>
+            <DropdownItem onClick={handleLoginClick}>
+              {isAuthenticated ? '🚪 Logout' : '🔐 Login'}
+            </DropdownItem>
+            <DropdownItem onClick={handleTutorialClick}>
+              📚 Como usar
+            </DropdownItem>
+          </DropdownMenu>
+        </LogoContainer>
+        
+        <SearchSection>
+          <SearchInput
+            type="text"
+            placeholder="Digite o nome do streamer para adicionar..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={handleKeyPress}
+          />
+          <AddButton onClick={handleAddStream} disabled={isValidating}>
+            {isValidating ? 'Validando...' : 'Adicionar Stream'}
           </AddButton>
-        )}
-        
-        <UserProfile />
-        
-              </NavSection>
+        </SearchSection>
+
+        <NavSection>
+          {streams && streams.length >= 2 && (
+            <AddButton onClick={onChatModeToggle}>
+              {chatMode === 'unified' ? 'Alternar Chats' : 'Chat Unificado'}
+            </AddButton>
+          )}
+          
+          <UserProfile />
+        </NavSection>
       </HeaderContainer>
       
       {notification && (
