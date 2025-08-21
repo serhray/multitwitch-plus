@@ -6,9 +6,7 @@ import StreamGrid from './components/StreamGrid';
 import SimplifiedChat from './components/SimplifiedChat';
 import IndividualChat from './components/IndividualChat';
 import AudioController from './components/AudioController';
-import AdBanner from './components/AdBanner';
 import AdSidebar from './components/AdSidebar';
-import RoomCreator from './components/RoomCreator';
 import Login from './components/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import io from 'socket.io-client';
@@ -75,12 +73,6 @@ function App() {
     }
   }, []);
 
-  const handleAudioControl = (data) => {
-    if (data.action === 'focus') {
-      setFocusedStream(data.streamId);
-    }
-    // Additional audio control logic would go here
-  };
 
   const handleStreamAdd = (channelName) => {
     const newStream = {

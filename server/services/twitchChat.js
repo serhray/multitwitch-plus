@@ -78,8 +78,10 @@ class TwitchChatService {
       // Emit to all users watching this channel
       this.io.emit('twitch-chat-message', chatMessage);
       
-      console.log(`[${channelName}] ${chatMessage.username}: ${message}`);
-      console.log('Emitting twitch-chat-message:', JSON.stringify(chatMessage, null, 2));
+      // Only log in development
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[${channelName}] ${chatMessage.username}: ${message}`);
+      }
     });
 
     this.client.on('error', (err) => {

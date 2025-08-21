@@ -111,7 +111,7 @@ function StreamPlayer({ stream, isFocused, onVote, votes, showVoteButton, layout
     if (stream && stream.isLive && stream.channel) {
       loadTwitchEmbed();
     }
-  }, [stream, layoutMode, isFocused]);
+  }, [stream, layoutMode, isFocused, loadTwitchEmbed]);
 
   useEffect(() => {
     // Adjust volume based on focus

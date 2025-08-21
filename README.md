@@ -112,7 +112,7 @@ npm run client
 
 ### 6. Acessar a Aplicação
 - **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000
+- **Backend API**: http://localhost:5001
 
 ## 📱 Como Usar
 

@@ -41,17 +41,6 @@ const ToggleButton = styled.button`
   }
 `;
 
-const LayoutSection = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 20px;
-`;
-
-const LayoutLabel = styled.span`
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-`;
 
 const VolumeSection = styled.div`
   margin-bottom: 20px;
@@ -186,7 +175,14 @@ const ActivityIndicator = styled.div`
   color: rgba(255, 255, 255, 0.8);
 `;
 
-function AudioController({ streams, focusedStream, settings, onSettingsChange, onStreamRemove, onLayoutModeChange }) {
+function AudioController() {
+  const [streams, setStreams] = useState([]);
+  const [focusedStream, setFocusedStream] = useState(null);
+  const [audioLevels, setAudioLevels] = useState({});
+  const [mutedStreams, setMutedStreams] = useState(new Set());
+  const [volumes, setVolumes] = useState({});
+  const [isMinimized, setIsMinimized] = useState(false);
+
   const [streamVolumes, setStreamVolumes] = useState({});
   const [activityDetection, setActivityDetection] = useState(null);
   const [layoutMode, setLayoutMode] = useState('normal');
@@ -202,7 +198,7 @@ function AudioController({ streams, focusedStream, settings, onSettingsChange, o
 
   useEffect(() => {
     // Simulate audio activity detection
-    if (settings.autoFocus && streams.length > 0) {
+    if (true && streams.length > 0) {
       const interval = setInterval(() => {
         // Mock activity detection - in real app, this would analyze audio levels
         const activeStream = streams[Math.floor(Math.random() * streams.length)];
@@ -222,30 +218,30 @@ function AudioController({ streams, focusedStream, settings, onSettingsChange, o
 
       return () => clearInterval(interval);
     }
-  }, [settings.autoFocus, streams]);
+  }, [streams]);
 
   const handleMasterVolumeChange = (e) => {
     const value = parseFloat(e.target.value);
-    onSettingsChange({
-      ...settings,
+    setVolumes(prev => ({
+      ...prev,
       masterVolume: value
-    });
+    }));
   };
 
   const handleFocusedVolumeChange = (e) => {
     const value = parseFloat(e.target.value);
-    onSettingsChange({
-      ...settings,
+    setVolumes(prev => ({
+      ...prev,
       focusedVolume: value
-    });
+    }));
   };
 
   const handleBackgroundVolumeChange = (e) => {
     const value = parseFloat(e.target.value);
-    onSettingsChange({
-      ...settings,
+    setVolumes(prev => ({
+      ...prev,
       backgroundVolume: value
-    });
+    }));
   };
 
   const handleStreamVolumeChange = (streamId, volume) => {
@@ -256,23 +252,23 @@ function AudioController({ streams, focusedStream, settings, onSettingsChange, o
   };
 
   const toggleAutoFocus = () => {
-    onSettingsChange({
-      ...settings,
-      autoFocus: !settings.autoFocus
-    });
+    setVolumes(prev => ({
+      ...prev,
+      autoFocus: !prev.autoFocus
+    }));
   };
 
   const handleRemoveStream = (streamId) => {
-    if (onStreamRemove) {
-      onStreamRemove(streamId);
+    if (true) {
+      setStreams(prev => prev.filter(stream => stream.id !== streamId));
     }
   };
 
   const toggleLayoutMode = () => {
     // Only normal mode available now
     setLayoutMode('normal');
-    if (onLayoutModeChange) {
-      onLayoutModeChange('normal');
+    if (true) {
+      console.log('Layout mode changed to normal');
     }
   };
 
@@ -285,10 +281,10 @@ function AudioController({ streams, focusedStream, settings, onSettingsChange, o
       <ControllerHeader>
         <Title>🎵 Controle de Áudio Inteligente</Title>
         <ToggleButton 
-          active={settings.autoFocus}
+          active={volumes.autoFocus}
           onClick={toggleAutoFocus}
         >
-          Auto-Focus {settings.autoFocus ? 'ON' : 'OFF'}
+          Auto-Focus {volumes.autoFocus ? 'ON' : 'OFF'}
         </ToggleButton>
       </ControllerHeader>
 
@@ -296,14 +292,14 @@ function AudioController({ streams, focusedStream, settings, onSettingsChange, o
       <VolumeSection>
         <VolumeLabel>
           Volume Master
-          <VolumeValue>{Math.round(settings.masterVolume * 100)}%</VolumeValue>
+          <VolumeValue>{Math.round((volumes.masterVolume || 0.5) * 100)}%</VolumeValue>
         </VolumeLabel>
         <VolumeSlider
           type="range"
           min="0"
           max="1"
           step="0.01"
-          value={settings.masterVolume}
+          value={volumes.masterVolume || 0.5}
           onChange={handleMasterVolumeChange}
         />
       </VolumeSection>
@@ -311,14 +307,14 @@ function AudioController({ streams, focusedStream, settings, onSettingsChange, o
       <VolumeSection>
         <VolumeLabel>
           Volume do Stream Principal
-          <VolumeValue>{Math.round(settings.focusedVolume * 100)}%</VolumeValue>
+          <VolumeValue>{Math.round((volumes.focusedVolume || 0.8) * 100)}%</VolumeValue>
         </VolumeLabel>
         <VolumeSlider
           type="range"
           min="0"
           max="1"
           step="0.01"
-          value={settings.focusedVolume}
+          value={volumes.focusedVolume || 0.8}
           onChange={handleFocusedVolumeChange}
         />
       </VolumeSection>
@@ -326,14 +322,14 @@ function AudioController({ streams, focusedStream, settings, onSettingsChange, o
       <VolumeSection>
         <VolumeLabel>
           Volume dos Streams Secundários
-          <VolumeValue>{Math.round(settings.backgroundVolume * 100)}%</VolumeValue>
+          <VolumeValue>{Math.round((volumes.backgroundVolume || 0.3) * 100)}%</VolumeValue>
         </VolumeLabel>
         <VolumeSlider
           type="range"
           min="0"
           max="1"
           step="0.01"
-          value={settings.backgroundVolume}
+          value={volumes.backgroundVolume || 0.3}
           onChange={handleBackgroundVolumeChange}
         />
       </VolumeSection>

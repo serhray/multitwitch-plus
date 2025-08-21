@@ -6,6 +6,14 @@
     "node": "20.x"
   },
   "scripts": {
-    "build": "npm --prefix client ci && npm --prefix client run build"
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client start",
+    "build": "npm --prefix client ci && npm --prefix client run build",
+    "start": "npm --prefix server start",
+    "install-deps": "npm --prefix server install && npm --prefix client install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

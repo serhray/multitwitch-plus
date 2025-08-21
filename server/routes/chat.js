@@ -1,6 +1,19 @@
 const express = require('express');
 const axios = require('axios');
+const { body, param, validationResult } = require('express-validator');
 const router = express.Router();
+
+// Middleware to handle validation errors
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ 
+      error: 'Validation failed', 
+      details: errors.array() 
+    });
+  }
+  next();
+};
 
 // Simple translation function with basic patterns
 async function translateMessage(text, targetLanguage = 'pt') {
@@ -56,7 +69,12 @@ async function translateMessage(text, targetLanguage = 'pt') {
 }
 
 // Get unified chat messages for multiple channels
-router.post('/unified', async (req, res) => {
+router.post('/unified', [
+  body('channels').isArray({ min: 1, max: 10 }).withMessage('Channels must be an array with 1-10 items'),
+  body('channels.*').isString().isLength({ min: 1, max: 50 }).matches(/^[a-zA-Z0-9_]+$/).withMessage('Invalid channel name'),
+  body('language').optional().isIn(['pt', 'en', 'es', 'fr', 'de']).withMessage('Invalid language'),
+  handleValidationErrors
+], async (req, res) => {
   try {
     const { channels, language = 'pt' } = req.body;
     
@@ -85,7 +103,11 @@ router.post('/unified', async (req, res) => {
 });
 
 // Translate a chat message
-router.post('/translate', async (req, res) => {
+router.post('/translate', [
+  body('message').isString().isLength({ min: 1, max: 500 }).escape().withMessage('Message must be 1-500 characters'),
+  body('targetLanguage').optional().isIn(['pt', 'en', 'es', 'fr', 'de']).withMessage('Invalid target language'),
+  handleValidationErrors
+], async (req, res) => {
   try {
     const { message, targetLanguage = 'pt' } = req.body;
     
@@ -104,7 +126,10 @@ router.post('/translate', async (req, res) => {
 });
 
 // Get chat statistics for activity detection
-router.get('/stats/:channel', async (req, res) => {
+router.get('/stats/:channel', [
+  param('channel').isString().isLength({ min: 1, max: 50 }).matches(/^[a-zA-Z0-9_]+$/).withMessage('Invalid channel name'),
+  handleValidationErrors
+], async (req, res) => {
   try {
     const { channel } = req.params;
     
@@ -127,7 +152,14 @@ router.get('/stats/:channel', async (req, res) => {
 });
 
 // Filter chat messages by keywords or patterns
-router.post('/filter', (req, res) => {
+router.post('/filter', [
+  body('messages').isArray({ max: 1000 }).withMessage('Messages must be an array with max 1000 items'),
+  body('filters').isObject().withMessage('Filters must be an object'),
+  body('filters.keywords').optional().isArray({ max: 50 }).withMessage('Keywords must be an array with max 50 items'),
+  body('filters.keywords.*').optional().isString().isLength({ min: 1, max: 100 }).withMessage('Each keyword must be 1-100 characters'),
+  body('filters.minLength').optional().isInt({ min: 1, max: 500 }).withMessage('Min length must be 1-500'),
+  handleValidationErrors
+], (req, res) => {
   try {
     const { messages, filters } = req.body;
     

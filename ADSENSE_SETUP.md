@@ -1,24 +1,43 @@
 # 📊 Google AdSense Setup Guide
 
-## **Pré-requisitos**
+## **Resolvendo o Erro de Verificação**
 
-### **1. Conta Google AdSense**
-- Criar conta em: https://www.google.com/adsense/
-- Verificar domínio da aplicação
-- Aguardar aprovação (1-4 semanas)
+### **Problema Atual**
+O erro "Não foi possível verificar seu site" indica que o AdSense não consegue acessar seu site. Para resolver:
 
-### **2. Configuração de Domínio**
-- Deploy da aplicação em domínio próprio
-- HTTPS obrigatório para AdSense
-- Política de privacidade necessária
+### **1. Deploy Necessário**
+- **Problema**: Site está rodando apenas localmente (localhost:3000)
+- **Solução**: Deploy em domínio público (Netlify, Vercel, etc.)
+- **Requisito**: HTTPS obrigatório para AdSense
+
+### **2. Passos para Resolver**
+
+#### **A. Deploy Imediato**
+```bash
+# Build do projeto
+npm run build
+
+# Deploy no Netlify/Vercel
+# Ou configure domínio próprio
+```
+
+#### **B. Configurar Domínio**
+- Registrar domínio próprio
+- Configurar DNS
+- Certificado SSL automático
+
+#### **C. Atualizar AdSense**
+- Adicionar novo site com domínio público
+- Aguardar verificação (24-48h)
+- Configurar unidades de anúncio
 
 ## **Configuração Técnica**
 
 ### **1. Variáveis de Ambiente**
-Copie `.env.example` para `.env` e configure:
+Substitua no `.env`:
 
 ```env
-# Google AdSense
+# Google AdSense - SUBSTITUIR pelos seus IDs reais
 REACT_APP_ADSENSE_CLIENT_ID=ca-pub-XXXXXXXXXXXXXXXXX
 REACT_APP_ADSENSE_BANNER_SLOT=1234567890
 REACT_APP_ADSENSE_SIDEBAR_SLOT=0987654321
@@ -26,8 +45,8 @@ REACT_APP_ENABLE_ADS=true
 ```
 
 ### **2. Obter IDs do AdSense**
-1. **Client ID**: Painel AdSense → Configurações → Informações da conta
-2. **Ad Slots**: Anúncios → Criar novo anúncio → Copiar código
+1. **Client ID**: Painel AdSense → Sites → Seu site → Código AdSense
+2. **Ad Slots**: Anúncios → Por unidade de anúncio → Criar
 
 ### **3. Posicionamento dos Anúncios**
 

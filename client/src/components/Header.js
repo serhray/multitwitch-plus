@@ -140,54 +140,16 @@ const AddButton = styled.button`
 
 const NavSection = styled.div`
   display: flex;
-  gap: 20px;
   align-items: center;
 `;
 
-const NavLink = styled(Link)`
-  color: white;
-  text-decoration: none;
-  padding: 10px 20px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-  font-weight: 500;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-1px);
-  }
-`;
-
-const RoomInfo = styled.div`
-  background: rgba(145, 70, 255, 0.2);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const StatusDot = styled.div`
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #00ff88;
-  animation: pulse 2s infinite;
-
-  @keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
-  }
-`;
 
 function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams, onChatModeToggle, chatMode }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
-  const { user, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   const handleAddStream = async () => {
     if (searchQuery.trim()) {

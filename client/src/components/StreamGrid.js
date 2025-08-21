@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import StreamPlayer from './StreamPlayer';
@@ -119,7 +119,6 @@ function StreamGrid({ streams, focusedStream, onStreamFocus, socket, currentRoom
   const effectiveFocusedId = focusedStream || (streams[0] && streams[0].id);
   const focusedStreamData = streams.find(stream => stream.id === effectiveFocusedId);
   const secondaryStreams = streams.filter(stream => stream.id !== effectiveFocusedId);
-  const hasSecondaryStreams = secondaryStreams.length > 0;
 
   if (streams.length === 0) {
     return (

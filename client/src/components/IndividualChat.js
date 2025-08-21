@@ -137,7 +137,7 @@ const IndividualChat = ({ streams = [], selectedChannel, onChannelChange, socket
   const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
   // Filter messages for selected channel
-  const channelMessages = messages.filter(message => 
+  const filteredMessages = messages.filter(message => 
     message.channel?.toLowerCase() === selectedChannel?.toLowerCase()
   );
 

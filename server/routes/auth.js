@@ -4,10 +4,18 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 
 // Configurações do Twitch OAuth
+// Validate required environment variables
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
 const TWITCH_CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
-const TWITCH_REDIRECT_URI = process.env.TWITCH_REDIRECT_URI || 'http://localhost:5001/auth/callback';
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const TWITCH_REDIRECT_URI = process.env.TWITCH_REDIRECT_URI;
+const JWT_SECRET = process.env.JWT_SECRET;
+const CLIENT_URL = process.env.CLIENT_URL || process.env.CORS_ORIGIN || 'http://localhost:3000';
+
+// Validate required environment variables
+if (!TWITCH_CLIENT_ID) throw new Error('TWITCH_CLIENT_ID environment variable is required');
+if (!TWITCH_CLIENT_SECRET) throw new Error('TWITCH_CLIENT_SECRET environment variable is required');
+if (!TWITCH_REDIRECT_URI) throw new Error('TWITCH_REDIRECT_URI environment variable is required');
+if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required');
 
 // Rota para iniciar o processo de autenticação
 router.get('/twitch', (req, res) => {
@@ -22,7 +30,7 @@ router.get('/callback', async (req, res) => {
   const { code } = req.query;
 
   if (!code) {
-    return res.redirect('http://localhost:3000?error=no_code');
+    return res.redirect(`${CLIENT_URL}?error=no_code`);
   }
 
   try {
@@ -63,10 +71,10 @@ router.get('/callback', async (req, res) => {
     );
 
     // Redirecionar de volta para o frontend com o token
-    res.redirect(`http://localhost:3000?token=${jwtToken}`);
+    res.redirect(`${CLIENT_URL}?token=${jwtToken}`);
   } catch (error) {
     console.error('Erro na autenticação:', error);
-    res.redirect('http://localhost:3000?error=auth_failed');
+    res.redirect(`${CLIENT_URL}?error=auth_failed`);
   }
 });
 
