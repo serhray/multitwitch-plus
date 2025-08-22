@@ -483,7 +483,7 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
           <FeatureSection>
             <FeatureTitle>👋 Olá!</FeatureTitle>
             <FeatureDescription>
-              Opa, me chamo Sérgio, ou clipszoka do Twitter/X, faço edição de video a uns 3 anos, na grande maioria sendo do Alanzoka, e atualmente estou aprendendo(tentando) sobre programação, sendo a MultiTwitch+ o meu primeiro pequeno projeto, não esta perfeito mas funcional!
+              Me chamo Sérgio, ou clipszoka do Twitter/X, faço edição de video a uns 3 anos, na grande maioria sendo do Alanzoka, e atualmente estou aprendendo(tentando) sobre programação, sendo a MultiTwitch+ o meu primeiro pequeno projeto, não esta perfeito mas funcional!
             </FeatureDescription>
             <FeatureDescription style={{ marginTop: '20px', fontStyle: 'italic', color: '#9146ff' }}>
               Espero que gostem!
