@@ -271,6 +271,8 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
   const [notification, setNotification] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
+  const [showFAQ, setShowFAQ] = useState(false);
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
@@ -323,8 +325,26 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
     setShowTutorial(true);
   };
 
+  const handleAboutClick = () => {
+    setShowDropdown(false);
+    setShowAbout(true);
+  };
+
+  const handleFAQClick = () => {
+    setShowDropdown(false);
+    setShowFAQ(true);
+  };
+
   const closeTutorial = () => {
     setShowTutorial(false);
+  };
+
+  const closeAbout = () => {
+    setShowAbout(false);
+  };
+
+  const closeFAQ = () => {
+    setShowFAQ(false);
   };
 
   return (
@@ -338,6 +358,12 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
           <DropdownMenu show={showDropdown}>
             <DropdownItem onClick={handleTutorialClick}>
               📖 Como Usar
+            </DropdownItem>
+            <DropdownItem onClick={handleAboutClick}>
+              👨‍💻 Sobre
+            </DropdownItem>
+            <DropdownItem onClick={handleFAQClick}>
+              ❓ FAQ
             </DropdownItem>
           </DropdownMenu>
         </div>
@@ -443,6 +469,80 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
               <FeatureListItem>Você pode ter até 4 streams simultâneas</FeatureListItem>
               <FeatureListItem>O foco muda automaticamente quando você remove o stream principal</FeatureListItem>
             </FeatureList>
+          </FeatureSection>
+        </ModalContent>
+      </ModalOverlay>
+
+      <ModalOverlay show={showAbout} onClick={closeAbout}>
+        <ModalContent show={showAbout} onClick={(e) => e.stopPropagation()}>
+          <ModalHeader>
+            <ModalTitle>👨‍💻 Sobre o MultiTwitch+</ModalTitle>
+            <CloseButton onClick={closeAbout}>×</CloseButton>
+          </ModalHeader>
+
+          <FeatureSection>
+            <FeatureTitle>👋 Olá!</FeatureTitle>
+            <FeatureDescription>
+              Opa, me chamo Sérgio, ou clipszoka do Twitter/X, faço edição de video a uns 3 anos, na grande maioria sendo do Alanzoka, e atualmente estou aprendendo(tentando) sobre programação, sendo a MultiTwitch+ o meu primeiro pequeno projeto, não esta perfeito mas funcional!
+            </FeatureDescription>
+            <FeatureDescription style={{ marginTop: '20px', fontStyle: 'italic', color: '#9146ff' }}>
+              Espero que gostem!
+            </FeatureDescription>
+          </FeatureSection>
+
+          <FeatureSection>
+            <FeatureTitle>🎯 Sobre o Projeto</FeatureTitle>
+            <FeatureDescription>
+              O MultiTwitch+ é uma ferramenta que permite assistir múltiplas streams do Twitch simultaneamente, oferecendo uma experiência única para quem gosta de acompanhar vários streamers ao mesmo tempo.
+            </FeatureDescription>
+          </FeatureSection>
+
+          <FeatureSection>
+            <FeatureTitle>🚀 Tecnologias Utilizadas</FeatureTitle>
+            <FeatureList>
+              <FeatureListItem>React.js - Interface do usuário</FeatureListItem>
+              <FeatureListItem>Node.js - Backend e APIs</FeatureListItem>
+              <FeatureListItem>Socket.IO - Comunicação em tempo real</FeatureListItem>
+              <FeatureListItem>Twitch API - Integração com streams</FeatureListItem>
+              <FeatureListItem>Styled Components - Estilização</FeatureListItem>
+            </FeatureList>
+          </FeatureSection>
+        </ModalContent>
+      </ModalOverlay>
+
+      <ModalOverlay show={showFAQ} onClick={closeFAQ}>
+        <ModalContent show={showFAQ} onClick={(e) => e.stopPropagation()}>
+          <ModalHeader>
+            <ModalTitle>❓ Perguntas Frequentes</ModalTitle>
+            <CloseButton onClick={closeFAQ}>×</CloseButton>
+          </ModalHeader>
+
+          <FeatureSection>
+            <FeatureTitle>🔄 Por que as streams resetam ao mudar layout?</FeatureTitle>
+            <FeatureDescription>
+              Isso é um comportamento normal! Quando você muda o layout (1/3 para 2/2), o React recria os componentes StreamPlayer e reinicializa os embeds do Twitch. Isso acontece porque as dimensões e posicionamento mudam, exigindo uma nova configuração dos embeds.
+            </FeatureDescription>
+          </FeatureSection>
+
+          <FeatureSection>
+            <FeatureTitle>📺 Quantas streams posso assistir simultaneamente?</FeatureTitle>
+            <FeatureDescription>
+              Você pode assistir até 4 streams ao mesmo tempo. O layout se ajusta automaticamente: 1 stream fica sozinha, 2+ streams usam o layout 1/3 (1 grande + 3 pequenas) ou 2/2 (4 do mesmo tamanho).
+            </FeatureDescription>
+          </FeatureSection>
+
+          <FeatureSection>
+            <FeatureTitle>📱 O site funciona no celular?</FeatureTitle>
+            <FeatureDescription>
+              Sim! O MultiTwitch+ é responsivo e funciona em dispositivos móveis. No celular, as streams se organizam em coluna única para melhor visualização. Recomendamos usar em landscape para uma experiência otimizada.
+            </FeatureDescription>
+          </FeatureSection>
+
+          <FeatureSection>
+            <FeatureTitle>🎯 Como otimizar minha experiência?</FeatureTitle>
+            <FeatureDescription>
+              Use nomes exatos dos streamers (ex: "pokimane", "xqc"), experimente diferentes layouts para encontrar o ideal, e aproveite o sistema de foco para destacar sua stream favorita. O foco muda automaticamente quando você remove o stream principal.
+            </FeatureDescription>
           </FeatureSection>
         </ModalContent>
       </ModalOverlay>
