@@ -25,14 +25,24 @@ const AdSense = ({
   isPremium = false 
 }) => {
   useEffect(() => {
+    console.log('AdSense Debug:', {
+      isPremium,
+      enableAds: process.env.REACT_APP_ENABLE_ADS,
+      clientId: process.env.REACT_APP_ADSENSE_CLIENT_ID,
+      slot,
+      format
+    });
+
     // Only load ads if not premium and AdSense is enabled
     if (isPremium || !process.env.REACT_APP_ENABLE_ADS) {
+      console.log('AdSense: Ads disabled or premium mode');
       return;
     }
 
     try {
       // Load AdSense script if not already loaded
       if (!window.adsbygoogle) {
+        console.log('AdSense: Loading script...');
         const script = document.createElement('script');
         script.async = true;
         script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.REACT_APP_ADSENSE_CLIENT_ID}`;
@@ -43,7 +53,10 @@ const AdSense = ({
       // Push ad after script loads
       const timer = setTimeout(() => {
         if (window.adsbygoogle) {
+          console.log('AdSense: Pushing ad...');
           (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } else {
+          console.log('AdSense: Script not loaded yet');
         }
       }, 100);
 
@@ -51,13 +64,15 @@ const AdSense = ({
     } catch (error) {
       console.error('AdSense error:', error);
     }
-  }, [isPremium, slot]);
+  }, [isPremium, slot, format]);
 
   // Don't render if premium or ads disabled
   if (isPremium || !process.env.REACT_APP_ENABLE_ADS || process.env.REACT_APP_PREMIUM_MODE === 'true') {
+    console.log('AdSense: Not rendering ad');
     return null;
   }
 
+  console.log('AdSense: Rendering ad container');
   return (
     <AdContainer className={className} isPremium={isPremium}>
       <ins

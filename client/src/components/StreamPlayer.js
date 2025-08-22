@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 const PlayerContainer = styled.div`
@@ -42,98 +42,43 @@ const OfflineIcon = styled.div`
   opacity: 0.5;
 `;
 
-
-const AudioControls = styled.div`
+const RemoveButton = styled.button`
   position: absolute;
   top: 10px;
   right: 10px;
-  display: flex;
-  gap: 5px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  
-  ${PlayerContainer}:hover & {
-    opacity: 1;
-  }
-`;
-
-const AudioButton = styled.button`
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(255, 59, 48, 0.8);
   border: none;
   border-radius: 50%;
   width: 32px;
   height: 32px;
   color: white;
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
   transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(145, 70, 255, 0.8);
-    transform: scale(1.1);
-  }
-`;
-
-const VolumeSlider = styled.input`
-  width: 60px;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-  outline: none;
+  font-weight: bold;
   opacity: 0;
-  transition: opacity 0.3s ease;
-  cursor: pointer;
-  
+  z-index: 10;
+
   ${PlayerContainer}:hover & {
     opacity: 1;
   }
 
-  &::-webkit-slider-thumb {
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: linear-gradient(45deg, #9146ff, #00f5ff);
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(145, 70, 255, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.2s ease;
-  }
-
-  &::-webkit-slider-thumb:hover {
+  &:hover {
+    background: rgba(255, 59, 48, 1);
     transform: scale(1.1);
-    box-shadow: 0 3px 12px rgba(145, 70, 255, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.2);
-  }
-
-  &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: linear-gradient(45deg, #9146ff, #00f5ff);
-    cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(145, 70, 255, 0.4);
-  }
-
-  &::-moz-range-track {
-    height: 6px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-    border: none;
+    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
   }
 `;
 
-
-function StreamPlayer({ stream, isFocused, onVote, votes, showVoteButton, layoutMode }) {
+function StreamPlayer({ stream, isFocused, onVote, votes, showVoteButton, layoutMode, onStreamRemove }) {
   const playerRef = useRef(null);
-  const [volume, setVolume] = useState(isFocused ? 1 : 0.3);
-  const [isMuted, setIsMuted] = useState(false);
+  const embedRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const loadTwitchEmbed = useCallback(() => {
+  const loadTwitchEmbed = () => {
     if (playerRef.current && window.Twitch && window.Twitch.Embed) {
       // Clear previous embed
       playerRef.current.innerHTML = '';
@@ -149,22 +94,24 @@ function StreamPlayer({ stream, isFocused, onVote, votes, showVoteButton, layout
         channel: stream.channel,
         layout: embedLayout,
         autoplay: true,
-        muted: isMuted,
-        volume: volume
+        muted: false,
+        volume: 1
       });
+
+      embedRef.current = embed;
 
       embed.addEventListener(window.Twitch.Embed.VIDEO_READY, () => {
         setIsLoaded(true);
         const player = embed.getPlayer();
         if (player) {
-          player.setVolume(volume);
-          player.setMuted(isMuted);
+          player.setVolume(1);
+          player.setMuted(false);
         }
       });
     } else {
       // Fallback: create iframe manually
       const iframe = document.createElement('iframe');
-      iframe.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&autoplay=true&muted=${isMuted}`;
+      iframe.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&autoplay=true&muted=false`;
       iframe.width = '100%';
       iframe.height = '100%';
       iframe.frameBorder = '0';
@@ -176,46 +123,20 @@ function StreamPlayer({ stream, isFocused, onVote, votes, showVoteButton, layout
         setIsLoaded(true);
       }
     }
-  }, [stream, layoutMode, isFocused, isMuted, volume]);
+  };
 
   useEffect(() => {
     if (stream && stream.isLive && stream.channel) {
       loadTwitchEmbed();
     }
-  }, [stream, layoutMode, isFocused, loadTwitchEmbed]);
+  }, [stream, layoutMode, isFocused]);
 
-  useEffect(() => {
-    // Adjust volume based on focus
-    setVolume(isFocused ? 1 : 0.3);
-  }, [isFocused]);
-
-  const handleVolumeChange = (e) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    
-    // Update Twitch player volume if available
-    if (window.Twitch && playerRef.current) {
-      const embed = playerRef.current.querySelector('iframe');
-      if (embed) {
-        // Send message to iframe (if same origin)
-        try {
-          embed.contentWindow.postMessage({
-            type: 'setVolume',
-            volume: newVolume
-          }, '*');
-        } catch (e) {
-          console.log('Cannot control iframe volume due to CORS');
-        }
-      }
+  const handleRemoveStream = (e) => {
+    e.stopPropagation();
+    if (onStreamRemove) {
+      onStreamRemove(stream.id);
     }
   };
-
-  const toggleMute = useCallback(() => {
-    setIsMuted(prev => !prev);
-    if (isLoaded) {
-      loadTwitchEmbed(); // Reload with new mute state
-    }
-  }, [isLoaded, loadTwitchEmbed]);
 
   // Safe guards for stream availability
   if (!stream || !stream.channel) {
@@ -246,21 +167,15 @@ function StreamPlayer({ stream, isFocused, onVote, votes, showVoteButton, layout
   return (
     <PlayerContainer isFocused={isFocused}>
       <TwitchEmbed ref={playerRef} />
-
-      <AudioControls>
-        <AudioButton onClick={toggleMute}>
-          {isMuted ? '🔇' : '🔊'}
-        </AudioButton>
-        <VolumeSlider
-          type="range"
-          min="0"
-          max="1"
-          step="0.1"
-          value={volume}
-          onChange={handleVolumeChange}
-        />
-      </AudioControls>
-
+      
+      {onStreamRemove && (
+        <RemoveButton 
+          onClick={handleRemoveStream}
+          title="Remover stream"
+        >
+          ✕
+        </RemoveButton>
+      )}
     </PlayerContainer>
   );
 }

@@ -37,6 +37,8 @@ async function getTwitchToken() {
   return await getAccessToken();
 }
 
+
+
 // Validate if streamer exists and is online
 router.post('/validate-streamer', async (req, res) => {
   try {

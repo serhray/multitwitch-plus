@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import StreamPlayer from './StreamPlayer';
@@ -36,6 +36,28 @@ const SecondaryStreamsContainer = styled.div`
   gap: 15px;
 `;
 
+const Grid2x2Container = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 15px;
+  height: 100%;
+  min-height: 600px;
+`;
+
+const Grid2x2Item = styled(motion.div)`
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+`;
+
 const SecondaryStreamWrapper = styled(motion.div)`
   border-radius: 10px;
   overflow: hidden;
@@ -47,28 +69,6 @@ const SecondaryStreamWrapper = styled(motion.div)`
     transform: scale(1.02);
   }
 `;
-
-const VoteButton = styled.button`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(145, 70, 255, 0.8);
-  border: none;
-  border-radius: 20px;
-  color: white;
-  padding: 5px 12px;
-  font-size: 12px;
-  cursor: pointer;
-  z-index: 10;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(145, 70, 255, 1);
-    transform: scale(1.05);
-  }
-`;
-
-
 
 const EmptyState = styled(motion.div)`
   display: flex;
@@ -99,24 +99,7 @@ const EmptySubtitle = styled.p`
   color: rgba(255, 255, 255, 0.6);
 `;
 
-function StreamGrid({ streams, focusedStream, onStreamFocus, socket, currentRoom, layoutMode }) {
-  const [votes, setVotes] = useState({});
-
-  const handleVote = (streamId) => {
-    if (socket && currentRoom) {
-      socket.emit('vote-focus', {
-        roomId: currentRoom.id,
-        streamId: streamId,
-        userId: 'user-' + Date.now() // In real app, use actual user ID
-      });
-    }
-    
-    setVotes(prev => ({
-      ...prev,
-      [streamId]: (prev[streamId] || 0) + 1
-    }));
-  };
-
+function StreamGrid({ streams, focusedStream, onStreamFocus, socket, currentRoom, layoutMode, onStreamRemove }) {
   // Ensure we always have a focused stream: fallback to the first one if none selected
   const effectiveFocusedId = focusedStream || (streams[0] && streams[0].id);
   const focusedStreamData = streams.find(stream => stream.id === effectiveFocusedId);
@@ -152,8 +135,38 @@ function StreamGrid({ streams, focusedStream, onStreamFocus, socket, currentRoom
             stream={focusedStreamData}
             isFocused={true}
             layoutMode={layoutMode}
+            onStreamRemove={onStreamRemove}
           />
         </FocusedStreamContainer>
+      </GridContainer>
+    );
+  }
+
+  // Layout 2/2 para 2+ streams
+  if (layoutMode === '2/2') {
+    return (
+      <GridContainer hasStreams={true}>
+        <Grid2x2Container>
+          <AnimatePresence>
+            {streams.slice(0, 4).map((stream, index) => (
+              <Grid2x2Item
+                key={stream.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                onClick={() => onStreamFocus(stream.id)}
+              >
+                <StreamPlayer
+                  stream={stream}
+                  isFocused={stream.id === focusedStream}
+                  layoutMode={layoutMode}
+                  onStreamRemove={onStreamRemove}
+                />
+              </Grid2x2Item>
+            ))}
+          </AnimatePresence>
+        </Grid2x2Container>
       </GridContainer>
     );
   }
@@ -173,6 +186,7 @@ function StreamGrid({ streams, focusedStream, onStreamFocus, socket, currentRoom
               stream={focusedStreamData}
               isFocused={true}
               layoutMode={layoutMode}
+              onStreamRemove={onStreamRemove}
             />
           </FocusedStreamContainer>
         )}
@@ -194,13 +208,8 @@ function StreamGrid({ streams, focusedStream, onStreamFocus, socket, currentRoom
                   stream={stream}
                   isFocused={false}
                   layoutMode={layoutMode}
+                  onStreamRemove={onStreamRemove}
                 />
-                <VoteButton onClick={(e) => {
-                  e.stopPropagation();
-                  handleVote(stream.id);
-                }}>
-                  👍 {votes[stream.id] || 0}
-                </VoteButton>
               </SecondaryStreamWrapper>
             ))}
           </AnimatePresence>

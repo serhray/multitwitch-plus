@@ -5,7 +5,6 @@ import Header from './components/Header';
 import StreamGrid from './components/StreamGrid';
 import SimplifiedChat from './components/SimplifiedChat';
 import IndividualChat from './components/IndividualChat';
-import AudioController from './components/AudioController';
 import AdSidebar from './components/AdSidebar';
 import Login from './components/Login';
 import { AuthProvider } from './contexts/AuthContext';
@@ -45,18 +44,24 @@ const ChatSection = styled.div`
   gap: 15px;
 `;
 
+const ChatContainer = styled.div`
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+`;
+
+const AdContainer = styled.div`
+  height: 250px;
+  margin-top: 15px;
+`;
+
 function App() {
   const [streams, setStreams] = useState([]);
   const [focusedStream, setFocusedStream] = useState(null);
   const [socket, setSocket] = useState(null);
   const [currentRoom, setCurrentRoom] = useState(null);
-  const [audioSettings, setAudioSettings] = useState({
-    masterVolume: 1.0,
-    focusedVolume: 1.0,
-    secondaryVolume: 0.3,
-    autoFocus: false
-  });
-  const [layoutMode, setLayoutMode] = useState('normal');
+  const [layoutMode, setLayoutMode] = useState('1/3'); // '1/3' or '2/2'
   const [showLogin, setShowLogin] = useState(false);
   const [chatMode, setChatMode] = useState('unified');
   const [selectedChannel, setSelectedChannel] = useState(null);
@@ -72,7 +77,6 @@ function App() {
       return () => newSocket.close();
     }
   }, []);
-
 
   const handleStreamAdd = (channelName) => {
     const newStream = {
@@ -99,6 +103,10 @@ function App() {
     if (chatMode === 'unified' && streams.length > 0 && !selectedChannel) {
       setSelectedChannel(streams[0].channel);
     }
+  };
+
+  const handleLayoutModeToggle = () => {
+    setLayoutMode(prev => prev === '1/3' ? '2/2' : '1/3');
   };
 
   const handleChannelChange = (channel) => {
@@ -128,6 +136,10 @@ function App() {
     }
   };
 
+  const handleStreamFocus = (streamId) => {
+    setFocusedStream(streamId);
+  };
+
   const handleRoomCreate = (roomData) => {
     setCurrentRoom(roomData);
     if (socket) {
@@ -147,6 +159,8 @@ function App() {
             streams={streams}
             onChatModeToggle={handleChatModeToggle}
             chatMode={chatMode}
+            layoutMode={layoutMode}
+            onLayoutModeToggle={handleLayoutModeToggle}
           />
           
           <Routes>
@@ -156,42 +170,39 @@ function App() {
                   <StreamGrid 
                     streams={streams}
                     focusedStream={focusedStream}
-                    onStreamFocus={setFocusedStream}
+                    onStreamFocus={handleStreamFocus}
                     socket={socket}
                     currentRoom={currentRoom}
                     layoutMode={layoutMode}
-                  />
-                  <AudioController 
-                    streams={streams}
-                    focusedStream={focusedStream}
-                    settings={audioSettings}
-                    onSettingsChange={setAudioSettings}
                     onStreamRemove={handleStreamRemove}
-                    onLayoutModeChange={setLayoutMode}
                   />
                 </StreamSection>
                 
                 <ChatSection>
-                  {chatMode === 'unified' ? (
-                    <SimplifiedChat 
-                      streams={streams}
-                      currentRoom={currentRoom}
-                      socket={socket}
-                    />
-                  ) : (
-                    <IndividualChat 
-                      streams={streams}
-                      selectedChannel={selectedChannel}
-                      onChannelChange={handleChannelChange}
-                      socket={socket}
-                    />
-                  )}
+                  <ChatContainer>
+                    {chatMode === 'unified' ? (
+                      <SimplifiedChat 
+                        streams={streams}
+                        currentRoom={currentRoom}
+                        socket={socket}
+                      />
+                    ) : (
+                      <IndividualChat 
+                        streams={streams}
+                        selectedChannel={selectedChannel}
+                        onChannelChange={handleChannelChange}
+                        socket={socket}
+                      />
+                    )}
+                  </ChatContainer>
                   
                   {/* Ad below chat */}
-                  <AdSidebar 
-                    slot={process.env.REACT_APP_ADSENSE_SIDEBAR_SLOT || "0987654321"}
-                    isPremium={false}
-                  />
+                  <AdContainer>
+                    <AdSidebar 
+                      slot={process.env.REACT_APP_ADSENSE_SIDEBAR_SLOT || "0987654321"}
+                      isPremium={false}
+                    />
+                  </AdContainer>
                 </ChatSection>
               </MainContent>
             } />
