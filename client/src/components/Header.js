@@ -534,7 +534,7 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
           <FeatureSection>
             <FeatureTitle>📱 O site funciona no celular?</FeatureTitle>
             <FeatureDescription>
-              Sim! O MultiTwitch+ é responsivo e funciona em dispositivos móveis. No celular, as streams se organizam em coluna única para melhor visualização. Recomendamos usar em landscape para uma experiência otimizada.
+              O MultiTwitch+ funciona em dispositivos móveis, mas a experiência não é ideal devido ao tamanho das telas. As streams ficam muito pequenas e difíceis de visualizar. Recomendamos usar em desktop para a melhor experiência, onde você pode aproveitar todos os recursos e layouts disponíveis.
             </FeatureDescription>
           </FeatureSection>
 
