@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import UserProfile from './UserProfile';
 import Notification from './Notification';
@@ -16,7 +16,7 @@ const HeaderContainer = styled.header`
   z-index: 1000;
 `;
 
-const Logo = styled.button`
+const Logo = styled.div`
   font-size: 24px;
   font-weight: bold;
   background: linear-gradient(45deg, #9146ff, #00f5ff);
@@ -28,18 +28,6 @@ const Logo = styled.button`
   border-radius: 8px;
   position: relative;
   z-index: 1001;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(145, 70, 255, 0.3);
-  }
-
-  &:active {
-    transform: scale(1.02);
-  }
 `;
 
 const DropdownMenu = styled.div`
@@ -86,6 +74,62 @@ const DropdownItem = styled.button`
   }
 `;
 
+const SupportButton = styled.button`
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  border: none;
+  border-radius: 25px;
+  padding: 10px 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    background: linear-gradient(45deg, #0056b3, #004085);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const CoffeeIcon = styled.div`
+  width: 20px;
+  height: 20px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &::before {
+    content: '';
+    width: 16px;
+    height: 12px;
+    background: white;
+    border: 2px solid #333;
+    border-radius: 0 0 8px 8px;
+    position: relative;
+  }
+  
+  &::after {
+    content: '♥';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff6b35;
+    font-size: 10px;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  }
+`;
+
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -114,6 +158,84 @@ const ModalContent = styled.div`
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   transform: ${props => props.show ? 'scale(1)' : 'scale(0.9)'};
   transition: all 0.3s ease;
+`;
+
+const PixModalContent = styled.div`
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  transform: scale(${props => props.show ? 1 : 0.9});
+  transition: all 0.3s ease;
+`;
+
+const PixTitle = styled.h2`
+  color: white;
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  background: linear-gradient(45deg, #00d4aa, #0099cc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+`;
+
+const PixInfo = styled.div`
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+`;
+
+const PixKey = styled.div`
+  background: rgba(0, 212, 170, 0.1);
+  border: 1px solid rgba(0, 212, 170, 0.3);
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #00d4aa;
+  word-break: break-all;
+`;
+
+const PixCopyButton = styled.button`
+  background: linear-gradient(45deg, #00d4aa, #0099cc);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 24px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 10px 5px;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 212, 170, 0.3);
+  }
+`;
+
+
+
+const PixCloseButton = styled.button`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 12px 24px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 10px 5px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
 `;
 
 const ModalHeader = styled.div`
@@ -266,28 +388,12 @@ const NavSection = styled.div`
   align-items: center;
 `;
 
-function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams, onChatModeToggle, chatMode, layoutMode, onLayoutModeToggle }) {
+function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams, layoutMode, onLayoutModeToggle }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [notification, setNotification] = useState(null);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(false);
-  const [showAbout, setShowAbout] = useState(false);
-  const [showFAQ, setShowFAQ] = useState(false);
-  const dropdownRef = useRef(null);
+  const [showPixModal, setShowPixModal] = useState(false);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
-      }
-    };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   const handleAddStream = async () => {
     if (!searchQuery.trim()) return;
@@ -316,57 +422,35 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
     }
   };
 
-  const handleLogoClick = () => {
-    setShowDropdown(!showDropdown);
+  const handleSupportClick = () => {
+    setShowPixModal(true);
   };
 
-  const handleTutorialClick = () => {
-    setShowDropdown(false);
-    setShowTutorial(true);
+  const closePixModal = () => {
+    setShowPixModal(false);
   };
 
-  const handleAboutClick = () => {
-    setShowDropdown(false);
-    setShowAbout(true);
+  const copyPixKey = () => {
+    const livePixUrl = 'https://livepix.gg/clipszoka';
+    navigator.clipboard.writeText(livePixUrl).then(() => {
+      showNotification('Link do LivePix copiado para a área de transferência!', 'success');
+    }).catch(() => {
+      showNotification('Erro ao copiar link do LivePix', 'error');
+    });
   };
 
-  const handleFAQClick = () => {
-    setShowDropdown(false);
-    setShowFAQ(true);
+  const openLivePix = () => {
+    window.open('https://livepix.gg/clipszoka', '_blank');
   };
 
-  const closeTutorial = () => {
-    setShowTutorial(false);
-  };
 
-  const closeAbout = () => {
-    setShowAbout(false);
-  };
-
-  const closeFAQ = () => {
-    setShowFAQ(false);
-  };
 
   return (
     <>
       <HeaderContainer>
-        <div style={{ position: 'relative' }} ref={dropdownRef}>
-          <Logo onClick={handleLogoClick}>
-            <span>Multitwitch+</span>
-          </Logo>
-          
-          <DropdownMenu show={showDropdown}>
-            <DropdownItem onClick={handleTutorialClick}>
-              📖 Como Usar
-            </DropdownItem>
-            <DropdownItem onClick={handleAboutClick}>
-              👨‍💻 Sobre
-            </DropdownItem>
-            <DropdownItem onClick={handleFAQClick}>
-              ❓ FAQ
-            </DropdownItem>
-          </DropdownMenu>
-        </div>
+        <Logo>
+          <span>Multitwitch+</span>
+        </Logo>
         
         <SearchSection>
           <SearchInput
@@ -387,11 +471,10 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
         </SearchSection>
 
         <NavSection>
-          {streams && streams.length >= 2 && (
-            <AddButton onClick={onChatModeToggle}>
-              {chatMode === 'unified' ? 'Alternar Chats' : 'Chat Unificado'}
-            </AddButton>
-          )}
+          <SupportButton onClick={handleSupportClick}>
+            <CoffeeIcon />
+            Support me
+          </SupportButton>
           
           <UserProfile />
         </NavSection>
@@ -405,146 +488,40 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
         />
       )}
 
-      <ModalOverlay show={showTutorial} onClick={closeTutorial}>
-        <ModalContent show={showTutorial} onClick={(e) => e.stopPropagation()}>
-          <ModalHeader>
-            <ModalTitle>🎮 Como Usar o MultiTwitch+</ModalTitle>
-            <CloseButton onClick={closeTutorial}>×</CloseButton>
-          </ModalHeader>
+      {/* Modal PIX */}
+      <ModalOverlay show={showPixModal} onClick={closePixModal}>
+        <PixModalContent show={showPixModal} onClick={(e) => e.stopPropagation()}>
+          <PixTitle>Apoie o Projeto</PixTitle>
+          
+          <PixInfo>
+            <p style={{ color: 'white', margin: '0 0 15px 0' }}>
+              Se você gostou do MultiTwitch+ e quer apoiar o desenvolvimento, 
+              considere fazer uma doação via PIX!
+            </p>
 
-          <FeatureSection>
-            <FeatureTitle>📺 Adicionar Streams</FeatureTitle>
-            <FeatureDescription>
-              Adicione múltiplos streamers para assistir simultaneamente:
-            </FeatureDescription>
-            <FeatureList>
-              <FeatureListItem>Digite o nome do streamer na barra de pesquisa</FeatureListItem>
-              <FeatureListItem>Clique em "Adicionar Stream" ou pressione Enter</FeatureListItem>
-              <FeatureListItem>O stream será carregado automaticamente</FeatureListItem>
-            </FeatureList>
-          </FeatureSection>
+          </PixInfo>
 
-          <FeatureSection>
-            <FeatureTitle>🎯 Focar em Streams</FeatureTitle>
-            <FeatureDescription>
-              Clique em qualquer stream para focar nele:
-            </FeatureDescription>
-            <FeatureList>
-              <FeatureListItem>O stream focado fica em destaque na parte superior</FeatureListItem>
-              <FeatureListItem>Streams secundários ficam na parte inferior</FeatureListItem>
-              <FeatureListItem>Você pode alternar o foco a qualquer momento</FeatureListItem>
-            </FeatureList>
-          </FeatureSection>
+          <div style={{ margin: '20px 0' }}>
+            <p style={{ color: 'white', margin: '0 0 10px 0', fontWeight: 'bold' }}>
+              Chave PIX:
+            </p>
+            <PixKey>
+              https://livepix.gg/clipszoka
+            </PixKey>
+          </div>
 
-          <FeatureSection>
-            <FeatureTitle>🔄 Layouts Disponíveis</FeatureTitle>
-            <FeatureDescription>
-              Escolha entre diferentes layouts de visualização:
-            </FeatureDescription>
-            <FeatureList>
-              <FeatureListItem><strong>Layout 1/3:</strong> Stream principal grande + 3 pequenos</FeatureListItem>
-              <FeatureListItem><strong>Layout 2/2:</strong> 4 streams do mesmo tamanho (2x2)</FeatureListItem>
-              <FeatureListItem>O botão de layout aparece quando há 2+ streams</FeatureListItem>
-              <FeatureListItem><em>OBS: mudar o layout ira reiniciar as streams.</em></FeatureListItem>
-            </FeatureList>
-          </FeatureSection>
-
-          <FeatureSection>
-            <FeatureTitle>🗑️ Remover Streams</FeatureTitle>
-            <FeatureDescription>
-              Para remover uma stream:
-            </FeatureDescription>
-            <FeatureList>
-              <FeatureListItem>Passe o mouse sobre a stream</FeatureListItem>
-              <FeatureListItem>Clique no botão "✕" vermelho que aparece</FeatureListItem>
-              <FeatureListItem>A stream será removida imediatamente</FeatureListItem>
-            </FeatureList>
-          </FeatureSection>
-
-          <FeatureSection>
-            <FeatureTitle>🚀 Dicas Rápidas</FeatureTitle>
-            <FeatureList>
-              <FeatureListItem>Use nomes exatos dos streamers (ex: "pokimane", "xqc")</FeatureListItem>
-              <FeatureListItem>O layout se ajusta automaticamente ao número de streams</FeatureListItem>
-              <FeatureListItem>Você pode ter até 4 streams simultâneas</FeatureListItem>
-              <FeatureListItem>O foco muda automaticamente quando você remove o stream principal</FeatureListItem>
-            </FeatureList>
-          </FeatureSection>
-        </ModalContent>
-      </ModalOverlay>
-
-      <ModalOverlay show={showAbout} onClick={closeAbout}>
-        <ModalContent show={showAbout} onClick={(e) => e.stopPropagation()}>
-          <ModalHeader>
-            <ModalTitle>👨‍💻 Sobre o MultiTwitch+</ModalTitle>
-            <CloseButton onClick={closeAbout}>×</CloseButton>
-          </ModalHeader>
-
-          <FeatureSection>
-            <FeatureTitle>👋 Olá!</FeatureTitle>
-            <FeatureDescription>
-              Me chamo Sérgio, ou clipszoka do Twitter/X, faço edição de video a uns 3 anos, na grande maioria sendo do Alanzoka, e atualmente estou aprendendo(tentando) sobre programação, sendo a MultiTwitch+ o meu primeiro pequeno projeto, não esta perfeito mas funcional!
-            </FeatureDescription>
-            <FeatureDescription style={{ marginTop: '20px', fontStyle: 'italic', color: '#9146ff' }}>
-              Espero que gostem!
-            </FeatureDescription>
-          </FeatureSection>
-
-          <FeatureSection>
-            <FeatureTitle>🎯 Sobre o Projeto</FeatureTitle>
-            <FeatureDescription>
-              O MultiTwitch+ é uma ferramenta que permite assistir múltiplas streams do Twitch simultaneamente, oferecendo uma experiência única para quem gosta de acompanhar vários streamers ao mesmo tempo.
-            </FeatureDescription>
-          </FeatureSection>
-
-          <FeatureSection>
-            <FeatureTitle>🚀 Tecnologias Utilizadas</FeatureTitle>
-            <FeatureList>
-              <FeatureListItem>React.js - Interface do usuário</FeatureListItem>
-              <FeatureListItem>Node.js - Backend e APIs</FeatureListItem>
-              <FeatureListItem>Socket.IO - Comunicação em tempo real</FeatureListItem>
-              <FeatureListItem>Twitch API - Integração com streams</FeatureListItem>
-              <FeatureListItem>Styled Components - Estilização</FeatureListItem>
-            </FeatureList>
-          </FeatureSection>
-        </ModalContent>
-      </ModalOverlay>
-
-      <ModalOverlay show={showFAQ} onClick={closeFAQ}>
-        <ModalContent show={showFAQ} onClick={(e) => e.stopPropagation()}>
-          <ModalHeader>
-            <ModalTitle>❓ Perguntas Frequentes</ModalTitle>
-            <CloseButton onClick={closeFAQ}>×</CloseButton>
-          </ModalHeader>
-
-          <FeatureSection>
-            <FeatureTitle>🔄 Por que as streams resetam ao mudar layout?</FeatureTitle>
-            <FeatureDescription>
-              Isso é um comportamento normal! Quando você muda o layout (1/3 para 2/2), o React recria os componentes StreamPlayer e reinicializa os embeds do Twitch. Isso acontece porque as dimensões e posicionamento mudam, exigindo uma nova configuração dos embeds.
-            </FeatureDescription>
-          </FeatureSection>
-
-          <FeatureSection>
-            <FeatureTitle>📺 Quantas streams posso assistir simultaneamente?</FeatureTitle>
-            <FeatureDescription>
-              Você pode assistir até 4 streams ao mesmo tempo. O layout se ajusta automaticamente: 1 stream fica sozinha, 2+ streams usam o layout 1/3 (1 grande + 3 pequenas) ou 2/2 (4 do mesmo tamanho).
-            </FeatureDescription>
-          </FeatureSection>
-
-          <FeatureSection>
-            <FeatureTitle>📱 O site funciona no celular?</FeatureTitle>
-            <FeatureDescription>
-              O MultiTwitch+ funciona em dispositivos móveis, mas a experiência não é ideal devido ao tamanho das telas. As streams ficam muito pequenas e difíceis de visualizar. Recomendamos usar em desktop para a melhor experiência, onde você pode aproveitar todos os recursos e layouts disponíveis.
-            </FeatureDescription>
-          </FeatureSection>
-
-          <FeatureSection>
-            <FeatureTitle>🎯 Como otimizar minha experiência?</FeatureTitle>
-            <FeatureDescription>
-              Use nomes exatos dos streamers (ex: "pokimane", "xqc"), experimente diferentes layouts para encontrar o ideal, e aproveite o sistema de foco para destacar sua stream favorita. O foco muda automaticamente quando você remove o stream principal.
-            </FeatureDescription>
-          </FeatureSection>
-        </ModalContent>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <PixCopyButton onClick={copyPixKey}>
+              📋 Copiar Link
+            </PixCopyButton>
+            <PixCopyButton onClick={openLivePix}>
+              🔗 Abrir LivePix
+            </PixCopyButton>
+            <PixCloseButton onClick={closePixModal}>
+              ✕ Fechar
+            </PixCloseButton>
+          </div>
+        </PixModalContent>
       </ModalOverlay>
     </>
   );
