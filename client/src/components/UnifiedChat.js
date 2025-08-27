@@ -337,6 +337,8 @@ function UnifiedChat({ streams, socket, currentRoom }) {
       console.log('Twitch Chat Status:', status);
     };
 
+
+
     // Remove existing listeners first
     socket.off('chat-message', handleRoomMessage);
     socket.off('twitch-chat-message', handleTwitchMessage);

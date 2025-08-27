@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import StreamPlayer from './StreamPlayer';
+import UnifiedStreamPlayer from './UnifiedStreamPlayer';
 
 const GridContainer = styled.div`
   flex: 1;
@@ -131,7 +131,7 @@ function StreamGrid({ streams, focusedStream, onStreamFocus, socket, currentRoom
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <StreamPlayer
+          <UnifiedStreamPlayer
             stream={focusedStreamData}
             isFocused={true}
             layoutMode={layoutMode}
@@ -157,7 +157,7 @@ function StreamGrid({ streams, focusedStream, onStreamFocus, socket, currentRoom
                 transition={{ duration: 0.3, delay: index * 0.1 }}
                 onClick={() => onStreamFocus(stream.id)}
               >
-                <StreamPlayer
+                <UnifiedStreamPlayer
                   stream={stream}
                   isFocused={stream.id === focusedStream}
                   layoutMode={layoutMode}
@@ -182,7 +182,7 @@ function StreamGrid({ streams, focusedStream, onStreamFocus, socket, currentRoom
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
           >
-            <StreamPlayer
+            <UnifiedStreamPlayer
               stream={focusedStreamData}
               isFocused={true}
               layoutMode={layoutMode}
@@ -204,7 +204,7 @@ function StreamGrid({ streams, focusedStream, onStreamFocus, socket, currentRoom
                 transition={{ duration: 0.3 }}
                 onClick={() => onStreamFocus(stream.id)}
               >
-                <StreamPlayer
+                <UnifiedStreamPlayer
                   stream={stream}
                   isFocused={false}
                   layoutMode={layoutMode}

@@ -14,7 +14,7 @@ app.use(helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:", "http:"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
-      connectSrc: ["'self'", "wss:", "https://api.twitch.tv", "https://id.twitch.tv"]
+      connectSrc: ["'self'", "wss:", "https://api.twitch.tv", "https://id.twitch.tv", "https://kick.com"]
     }
   }
 }));
@@ -68,10 +68,12 @@ app.get('/api/health', (req, res) => {
 const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
 const emotesRoutes = require('./routes/emotes');
+const kickRoutes = require('./routes/kick');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/emotes', emotesRoutes);
+app.use('/api/kick', kickRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

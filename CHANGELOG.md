@@ -2,6 +2,56 @@
 
 All notable changes to Multitwitch+ will be documented in this file.
 
+## [1.2.0] - 2025-01-XX
+
+### 🌐 Multi-Platform Support
+- **NEW**: Added support for Kick streaming platform
+- **NEW**: Unified search across Twitch and Kick platforms
+- **NEW**: Automatic platform detection based on streamer name/URL
+- **NEW**: Platform badges for visual identification (green for Kick, purple for Twitch)
+- **NEW**: Unified stream player that supports both platforms
+
+### 🔍 Enhanced Search Experience
+- **NEW**: UnifiedStreamSearch component with platform selection
+- **NEW**: Automatic platform detection from URLs (kick.com/streamer, twitch.tv/streamer)
+- **NEW**: Manual platform selection option
+- **NEW**: Combined search results from both platforms
+- **NEW**: Real-time search with debouncing
+
+### 📺 Improved Player Experience
+- **NEW**: UnifiedStreamPlayer component supporting both Twitch and Kick
+- **NEW**: Platform-specific player embeds (Twitch Embed API and Kick iframe)
+- **NEW**: Stream information overlay with title and game
+- **NEW**: Visual platform identification with colored badges
+
+### 💬 Chat Integration
+- **NOTE**: Chat system uses Twitch as primary platform
+- **NOTE**: Kick streams work without chat integration
+- **NOTE**: Chat functionality limited to Twitch streams only
+
+### 🔧 Backend Enhancements
+- **NEW**: Kick API integration with comprehensive endpoints
+- **NEW**: Unified streamer service for both platforms
+- **NEW**: Platform detection and channel name cleaning utilities
+- **NEW**: Error handling for platform-specific API failures
+
+### 🎨 UI/UX Improvements
+- **NEW**: Platform-specific color schemes (green for Kick, purple for Twitch)
+- **NEW**: Enhanced search interface with platform toggles
+- **NEW**: Improved stream information display
+- **NEW**: Better visual feedback for platform selection
+
+### 📚 Documentation
+- **NEW**: KICK_SUPPORT.md with comprehensive Kick integration guide
+- **UPDATED**: README.md with multi-platform features
+- **UPDATED**: API documentation for Kick endpoints
+
+### 🛠️ Technical Improvements
+- **NEW**: Unified service architecture for multi-platform support
+- **NEW**: Platform detection algorithms
+- **NEW**: Fallback mechanisms for API failures
+- **IMPROVED**: Error handling for cross-platform scenarios
+
 ## [1.1.0] - 2025-08-20
 
 ### 🔒 Security Improvements

@@ -20,7 +20,8 @@
     "multitwitch-plus": "file:..",
     "socket.io": "^4.7.2",
     "tmi.js": "^1.8.5",
-    "winston": "^3.11.0"
+    "winston": "^3.11.0",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

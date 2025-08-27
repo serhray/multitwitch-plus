@@ -59,7 +59,7 @@ app.use(helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:", "http:"],
       scriptSrc: ["'self'"],
-      connectSrc: ["'self'", "wss:", "https://api.twitch.tv", "https://id.twitch.tv"]
+      connectSrc: ["'self'", "wss:", "https://api.twitch.tv", "https://id.twitch.tv", "https://kick.com"]
     }
   }
 }));
@@ -187,6 +187,8 @@ io.on('connection', (socket) => {
       console.error('Error leaving Twitch chat:', error);
     }
   });
+
+
 
   // Handle stream focus voting
   socket.on('vote-focus', (data) => {

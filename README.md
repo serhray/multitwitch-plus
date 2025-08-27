@@ -1,6 +1,6 @@
 # 🚀 Multitwitch+ 
 
-Uma plataforma avançada de streaming que permite assistir múltiplas streams da Twitch simultaneamente com recursos inteligentes de áudio, chat unificado e funcionalidades de comunidade.
+Uma plataforma avançada de streaming que permite assistir múltiplas streams da Twitch e Kick simultaneamente com recursos inteligentes de áudio, chat unificado e funcionalidades de comunidade.
 
 ## ✨ Funcionalidades
 
@@ -8,6 +8,12 @@ Uma plataforma avançada de streaming que permite assistir múltiplas streams da
 - **Troca automática de áudio**: O áudio ativa sozinho quando o streamer começa a falar mais alto
 - **Mixagem de áudio**: Diminui o volume dos streams secundários automaticamente
 - **Controle individual**: Ajuste o volume de cada stream independentemente
+
+### 🌐 Suporte Multi-Plataforma
+- **Twitch**: Suporte completo para streams da Twitch
+- **Kick**: Suporte completo para streams da Kick
+- **Detecção automática**: Detecta automaticamente a plataforma baseado no nome do streamer
+- **Busca unificada**: Busca streamers em ambas as plataformas simultaneamente
 
 ### 📺 Modo Stream Principal Dinâmico
 - **Detecção de atividade**: Identifica qual streamer está mais ativo
@@ -18,6 +24,7 @@ Uma plataforma avançada de streaming que permite assistir múltiplas streams da
 - **Multi-canal**: Junta chats de vários canais em um único painel
 - **Tradução automática**: Traduz mensagens para o idioma do usuário
 - **Tags de canal**: Identifica de qual canal veio cada mensagem
+- **Plataforma**: Funciona apenas com streams da Twitch
 
 ### 🏠 Salas de Watch Party
 - **Assistir juntos**: Crie salas para grupos assistirem streams em conjunto
@@ -40,7 +47,8 @@ Uma plataforma avançada de streaming que permite assistir múltiplas streams da
 - **Node.js** + **Express.js** - Servidor web
 - **Socket.IO** - Comunicação em tempo real
 - **Axios** - Requisições HTTP
-- **Twitch API** - Dados dos streams
+- **Twitch API** - Dados dos streams da Twitch
+- **Kick API** - Dados dos streams da Kick
 - **Google Translate API** - Tradução de mensagens
 
 ### Frontend
@@ -117,9 +125,11 @@ npm run client
 ## 📱 Como Usar
 
 ### 1. Adicionar Streams
-- Digite o nome do streamer na barra de pesquisa
-- Clique em "Adicionar Stream"
-- O stream aparecerá no grid principal
+- Digite o nome do streamer na barra de pesquisa (ex: "ninja", "kick.com/streamer")
+- O sistema detecta automaticamente se é Twitch ou Kick
+- Ou escolha manualmente a plataforma desmarcando "Detectar automaticamente"
+- Clique em "Adicionar Stream" ou selecione da lista de resultados
+- O stream aparecerá no grid principal com badge da plataforma
 
 ### 2. Controle de Áudio
 - Use o painel "Controle de Áudio Inteligente"
@@ -242,6 +252,8 @@ CMD ["npm", "start"]
 - [ ] Sistema de notificações
 - [ ] Suporte a YouTube Live
 - [ ] App mobile (React Native)
+- [ ] Chat da Kick integrado
+- [ ] Mais plataformas de streaming
 
 ### Melhorias Técnicas
 - [ ] Testes automatizados

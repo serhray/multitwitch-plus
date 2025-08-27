@@ -303,10 +303,10 @@ const FeatureListItem = styled.li`
 
 const SearchSection = styled.div`
   display: flex;
-  gap: 15px;
+  gap: 10px;
   align-items: center;
   flex: 1;
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 30px;
 `;
 
@@ -328,6 +328,38 @@ const SearchInput = styled.input`
   &:focus {
     border-color: #9146ff;
     box-shadow: 0 0 20px rgba(145, 70, 255, 0.3);
+  }
+`;
+
+const PlatformSelector = styled.div`
+  display: flex;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+`;
+
+const PlatformButton = styled.button`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 16px;
+  background: ${props => props.active ? 
+    (props.platform === 'kick' ? 'linear-gradient(135deg, #00ff88 0%, #00cc6a 100%)' : 'linear-gradient(135deg, #9146ff 0%, #772ce8 100%)') : 
+    'transparent'};
+  color: ${props => props.active ? 'white' : 'rgba(255, 255, 255, 0.7)'};
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &:hover {
+    background: ${props => props.active ? 
+      (props.platform === 'kick' ? 'linear-gradient(135deg, #00ff88 0%, #00cc6a 100%)' : 'linear-gradient(135deg, #9146ff 0%, #772ce8 100%)') : 
+      'rgba(255, 255, 255, 0.1)'};
+    color: white;
   }
 `;
 
@@ -390,6 +422,7 @@ const NavSection = styled.div`
 
 function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams, layoutMode, onLayoutModeToggle }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedPlatform, setSelectedPlatform] = useState('twitch');
   const [notification, setNotification] = useState(null);
   const [showPixModal, setShowPixModal] = useState(false);
 
@@ -406,10 +439,19 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
       return;
     }
 
-    // Add stream directly (como funcionava antes)
-    onStreamAdd(channelName);
+    // Create stream data with platform info
+    const streamData = {
+      id: `${selectedPlatform}-${channelName}`,
+      channel: channelName,
+      platform: selectedPlatform,
+      displayName: channelName,
+      isLive: true
+    };
+
+    // Add stream with platform info
+    onStreamAdd(streamData);
     setSearchQuery('');
-    showNotification(`Streamer "${channelName}" adicionado com sucesso!`, 'success');
+    showNotification(`Streamer "${channelName}" (${selectedPlatform.toUpperCase()}) adicionado com sucesso!`, 'success');
   };
 
   const showNotification = (message, type = 'info') => {
@@ -420,6 +462,10 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
     if (e.key === 'Enter') {
       handleAddStream();
     }
+  };
+
+  const handlePlatformChange = (platform) => {
+    setSelectedPlatform(platform);
   };
 
   const handleSupportClick = () => {
@@ -460,6 +506,24 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
           />
+          <PlatformSelector>
+            <PlatformButton
+              type="button"
+              platform="twitch"
+              active={selectedPlatform === 'twitch'}
+              onClick={() => handlePlatformChange('twitch')}
+            >
+              Twitch
+            </PlatformButton>
+            <PlatformButton
+              type="button"
+              platform="kick"
+              active={selectedPlatform === 'kick'}
+              onClick={() => handlePlatformChange('kick')}
+            >
+              Kick
+            </PlatformButton>
+          </PlatformSelector>
           <AddButton onClick={handleAddStream}>
             Adicionar Stream
           </AddButton>

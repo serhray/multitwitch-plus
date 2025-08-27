@@ -257,12 +257,22 @@ function App() {
     }
   }, []);
 
-  const handleStreamAdd = (channelName) => {
+  const handleStreamAdd = (streamData) => {
+    // Check if streamer is already added
+    if (streams.some(stream => stream.channel.toLowerCase() === streamData.channel.toLowerCase())) {
+      return; // Stream already exists
+    }
+
     const newStream = {
-      id: Date.now(),
-      channel: channelName,
-      isLive: true
+      id: streamData.id || `${streamData.platform}-${streamData.channel}`,
+      channel: streamData.channel,
+      platform: streamData.platform || 'twitch',
+      displayName: streamData.displayName || streamData.channel,
+      avatar: streamData.avatar,
+      isLive: streamData.isLive || false,
+      stream: streamData.stream
     };
+    
     setStreams(prev => [...prev, newStream]);
     
     if (!focusedStream) {
@@ -271,7 +281,7 @@ function App() {
     
     // Set first channel as default for individual chat
     if (!selectedChannel) {
-      setSelectedChannel(channelName);
+      setSelectedChannel(streamData.channel);
     }
   };
 
