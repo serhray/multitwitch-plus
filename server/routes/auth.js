@@ -70,8 +70,25 @@ router.get('/callback', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    // Redirecionar de volta para o frontend com o token
-    res.redirect(`${CLIENT_URL}?token=${jwtToken}`);
+    // Definir cookie seguro com o token - Compatível com Brave
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? undefined : undefined
+    };
+
+    // Em desenvolvimento, não usar secure para permitir HTTP
+    if (process.env.NODE_ENV !== 'production') {
+      cookieOptions.secure = false;
+    }
+
+    res.cookie('auth_token', jwtToken, cookieOptions);
+
+    // Redirecionar de volta para o frontend
+    res.redirect(`${CLIENT_URL}`);
   } catch (error) {
     console.error('Erro na autenticação:', error);
     res.redirect(`${CLIENT_URL}?error=auth_failed`);
@@ -80,7 +97,8 @@ router.get('/callback', async (req, res) => {
 
 // Rota para verificar token
 router.get('/verify', (req, res) => {
-  const token = req.headers.authorization?.replace('Bearer ', '');
+  // Tentar obter token do cookie primeiro, depois do header
+  const token = req.cookies.auth_token || req.headers.authorization?.replace('Bearer ', '');
 
   if (!token) {
     return res.status(401).json({ error: 'Token não fornecido' });
@@ -94,9 +112,12 @@ router.get('/verify', (req, res) => {
   }
 });
 
+
+
 // Rota para logout
 router.post('/logout', async (req, res) => {
-  const token = req.headers.authorization?.replace('Bearer ', '');
+  // Tentar obter token do cookie primeiro, depois do header
+  const token = req.cookies.auth_token || req.headers.authorization?.replace('Bearer ', '');
 
   if (!token) {
     return res.status(401).json({ error: 'Token não fornecido' });
@@ -107,6 +128,21 @@ router.post('/logout', async (req, res) => {
     
     // Revogar token no Twitch
     await axios.post(`https://id.twitch.tv/oauth2/revoke?client_id=${TWITCH_CLIENT_ID}&token=${decoded.access_token}`);
+    
+    // Limpar cookie - Compatível com Brave
+    const clearCookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      path: '/'
+    };
+
+    // Em desenvolvimento, não usar secure para permitir HTTP
+    if (process.env.NODE_ENV !== 'production') {
+      clearCookieOptions.secure = false;
+    }
+
+    res.clearCookie('auth_token', clearCookieOptions);
     
     res.json({ message: 'Logout realizado com sucesso' });
   } catch (error) {

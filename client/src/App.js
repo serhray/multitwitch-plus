@@ -7,6 +7,7 @@ import SimplifiedChat from './components/SimplifiedChat';
 import IndividualChat from './components/IndividualChat';
 import AdSidebar from './components/AdSidebar';
 import Login from './components/Login';
+
 import { AuthProvider } from './contexts/AuthContext';
 import io from 'socket.io-client';
 
@@ -448,6 +449,16 @@ function App() {
                           <FAQQuestion>📱 O site funciona no celular?</FAQQuestion>
                           <FAQAnswer>O MultiTwitch+ funciona em dispositivos móveis, mas a experiência não é ideal devido ao tamanho das telas. As streams ficam muito pequenas e difíceis de visualizar. Recomendamos usar em desktop para a melhor experiência, onde você pode aproveitar todos os recursos e layouts disponíveis.</FAQAnswer>
                         </FAQItem>
+                        
+                        <FAQItem>
+                          <FAQQuestion>🦁 O login automático funciona no Brave?</FAQQuestion>
+                          <FAQAnswer>O Brave Browser possui configurações de privacidade muito restritivas que podem bloquear o login automático da Twitch. Se você usa o Brave e o login automático não funciona, recomendamos usar outro navegador (Chrome, Firefox, Edge) para uma experiência completa. O MultiTwitch+ funciona perfeitamente em todos os navegadores, mas o login automático pode ser limitado no Brave devido às suas configurações de privacidade.</FAQAnswer>
+                        </FAQItem>
+                        
+                        <FAQItem>
+                          <FAQQuestion>🎯 Por que o chat da Kick não funciona?</FAQQuestion>
+                          <FAQAnswer>O chat da Kick não está disponível no momento devido a limitações técnicas da plataforma. O MultiTwitch+ suporta apenas o chat do Twitch atualmente. As streams da Kick funcionam normalmente, mas o chat não está integrado.</FAQAnswer>
+                        </FAQItem>
                       </InfoContent>
                     </InfoCard>
                   </InfoContainer>
@@ -472,6 +483,8 @@ function App() {
             isOpen={showLogin}
             onClose={() => setShowLogin(false)}
           />
+          
+
         </AppContainer>
       </Router>
     </AuthProvider>

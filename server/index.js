@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const winston = require('winston');
 require('dotenv').config();
 
@@ -64,32 +65,40 @@ app.use(helmet({
   }
 }));
 
-// CORS configuration
+// CORS configuration - Compatível com Brave Browser
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       process.env.CORS_ORIGIN || 'http://localhost:3000',
       process.env.CLIENT_URL || 'http://localhost:3000',
       'http://localhost:3000',
+      'http://127.0.0.1:3000',
       process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
       'https://your-domain.vercel.app'
     ].filter(Boolean);
     
-    // Allow requests with no origin (mobile apps, etc.)
+    // Allow requests with no origin (mobile apps, Brave, etc.)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.log('CORS blocked origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
+  exposedHeaders: ['Set-Cookie'],
+  preflightContinue: false,
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
+
+// Cookie parser middleware
+app.use(cookieParser());
 
 // Rate limiting
 const limiter = rateLimit({
@@ -118,12 +127,14 @@ const chatRoutes = require('./routes/chat');
 const authRoutes = require('./routes/auth');
 const emoteRoutes = require('./routes/emotes');
 
+
 // Use routes
 app.use('/api/twitch', twitchRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/emotes', emoteRoutes);
 app.use('/auth', authRoutes);
+
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {

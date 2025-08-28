@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getAuthToken, setAuthToken, removeAuthToken } from '../utils/cookieUtils';
+
 
 const AuthContext = createContext();
 
@@ -13,20 +15,30 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('auth_token'));
+  
+  // Fallback para localStorage se cookies não funcionarem (compatibilidade com Brave)
+  const getInitialToken = () => {
+    const cookieToken = getAuthToken();
+    if (cookieToken) return cookieToken;
+    
+    // Fallback para localStorage
+    const localStorageToken = localStorage.getItem('auth_token');
+    if (localStorageToken) {
+      // Migrar para cookies
+      setAuthToken(localStorageToken);
+      localStorage.removeItem('auth_token');
+      return localStorageToken;
+    }
+    
+    return null;
+  };
+  
+  const [token, setToken] = useState(getInitialToken());
 
   useEffect(() => {
-    // Verificar se há um token na URL (callback do OAuth)
+    // Verificar se há um erro na URL (callback do OAuth)
     const urlParams = new URLSearchParams(window.location.search);
-    const urlToken = urlParams.get('token');
     const error = urlParams.get('error');
-
-    if (urlToken) {
-      localStorage.setItem('auth_token', urlToken);
-      setToken(urlToken);
-      // Limpar URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
 
     if (error) {
       console.error('Erro na autenticação:', error);
@@ -42,11 +54,15 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
+      console.log('Verificando token:', token ? 'Token presente' : 'Token ausente');
+      console.log('Cookie auth_token:', getAuthToken() ? 'Presente' : 'Ausente');
+
       try {
         const response = await fetch('/api/auth?action=verify', {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
+          credentials: 'include', // Incluir cookies na requisição
         });
 
         if (response.ok) {
@@ -54,12 +70,12 @@ export const AuthProvider = ({ children }) => {
           setUser(data.user);
         } else {
           // Token inválido
-          localStorage.removeItem('auth_token');
+          removeAuthToken();
           setToken(null);
         }
       } catch (error) {
         console.error('Erro ao verificar token:', error);
-        localStorage.removeItem('auth_token');
+        removeAuthToken();
         setToken(null);
       } finally {
         setIsLoading(false);
@@ -87,12 +103,13 @@ export const AuthProvider = ({ children }) => {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
+          credentials: 'include', // Incluir cookies na requisição
         });
       }
     } catch (error) {
       console.error('Erro no logout:', error);
     } finally {
-      localStorage.removeItem('auth_token');
+      removeAuthToken();
       setToken(null);
       setUser(null);
     }
