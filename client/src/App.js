@@ -467,12 +467,15 @@ function App() {
                 {/* Links Sociais */}
                 <SocialSection>
                   <SocialContainer>
-                    <SocialLink href="https://x.com/clips_alanzoka" target="_blank" rel="noopener noreferrer">
-                      🎬 Visite minha página de clipes no Twitter
-                    </SocialLink>
-                    <ContactEmail>
-                      📧 clipszoka04@gmail.com
-                    </ContactEmail>
+                    <div style={{ 
+                      color: 'rgba(255, 255, 255, 0.7)', 
+                      fontSize: '18px', 
+                      fontWeight: 'normal',
+                      textAlign: 'center',
+                      width: '100%'
+                    }}>
+                      @2025 Multitwitch+
+                    </div>
                   </SocialContainer>
                 </SocialSection>
               </>

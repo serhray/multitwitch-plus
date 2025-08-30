@@ -535,10 +535,10 @@ function Header({ onStreamAdd, currentRoom, onRoomCreate, onLoginClick, streams,
         </SearchSection>
 
         <NavSection>
-          <SupportButton onClick={handleSupportClick}>
+          {/* <SupportButton onClick={handleSupportClick}>
             <CoffeeIcon />
             Support me
-          </SupportButton>
+          </SupportButton> */}
           
           <UserProfile />
         </NavSection>

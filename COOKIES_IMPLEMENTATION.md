@@ -153,3 +153,4 @@ O sistema foi projetado para ser compatível com o sistema anterior:
 - Verificar configurações de origem permitida
 - Verificar se `credentials: true` está configurado
 - Verificar headers permitidos
+
